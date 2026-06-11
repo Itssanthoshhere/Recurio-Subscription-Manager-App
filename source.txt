@@ -1,0 +1,132 @@
+# Recurio — Initial Project Setup
+
+## Create Expo App
+
+```bash
+npx create-expo-app@latest --template default@sdk-54 ./
+```
+
+---
+
+# Start Development Server
+
+```bash
+npx expo start
+```
+
+---
+
+# Reset Starter Files (Optional)
+
+```bash
+npm run reset-project
+```
+
+---
+
+# Install NativeWind & Required Dependencies
+
+```bash
+npx expo install nativewind@preview react-native-css react-native-reanimated react-native-safe-area-context
+```
+
+---
+
+# Install Tailwind CSS Tooling
+
+```bash
+npx expo install --dev tailwindcss @tailwindcss/postcss postcss
+```
+
+---
+
+# Generate Metro Configuration
+
+```bash
+npx expo customize metro.config.js
+```
+
+---
+
+# Run Application
+
+### iOS Simulator
+
+```bash
+npx expo start
+```
+
+Then press:
+
+```bash
+i
+```
+
+---
+
+### Android Emulator
+
+```bash
+npx expo start
+```
+
+Then press:
+
+```bash
+a
+```
+
+---
+
+### Expo Go (Physical Device)
+
+```bash
+npx expo start
+```
+
+Scan the QR code using:
+
+* **Expo Go** (Android)
+* **Camera App** (iPhone)
+
+---
+
+# Production Build (Later)
+
+Using EAS Build:
+
+```bash
+npm install -g eas-cli
+```
+
+```bash
+eas login
+```
+
+```bash
+eas build:configure
+```
+
+### Android
+
+```bash
+eas build --platform android
+```
+
+### iOS
+
+```bash
+eas build --platform ios
+```
+
+---
+
+# Current Tech Stack
+
+- Expo SDK 54
+- React Native
+- Expo Router
+- NativeWind v5 (Preview)
+- Tailwind CSS
+- React Native Reanimated
+- React Native Safe Area Context
