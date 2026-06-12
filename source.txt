@@ -8,7 +8,7 @@ npx create-expo-app@latest --template default@sdk-54 ./
 
 ---
 
-# Start Development Server
+## Start Development Server
 
 ```bash
 npx expo start
@@ -16,7 +16,7 @@ npx expo start
 
 ---
 
-# Reset Starter Files (Optional)
+## Reset Starter Files (Optional)
 
 ```bash
 npm run reset-project
@@ -24,7 +24,7 @@ npm run reset-project
 
 ---
 
-# Install NativeWind & Required Dependencies
+## Install NativeWind & Core Dependencies
 
 ```bash
 npx expo install nativewind@preview react-native-css react-native-reanimated react-native-safe-area-context
@@ -32,7 +32,7 @@ npx expo install nativewind@preview react-native-css react-native-reanimated rea
 
 ---
 
-# Install Tailwind CSS Tooling
+## Install Tailwind CSS Tooling
 
 ```bash
 npx expo install --dev tailwindcss @tailwindcss/postcss postcss
@@ -40,7 +40,7 @@ npx expo install --dev tailwindcss @tailwindcss/postcss postcss
 
 ---
 
-# Generate Metro Configuration
+## Generate Metro Configuration
 
 ```bash
 npx expo customize metro.config.js
@@ -48,7 +48,25 @@ npx expo customize metro.config.js
 
 ---
 
-# Run Application
+## Install Additional Utilities
+
+### clsx (Conditional Class Names)
+
+```bash
+npm i clsx
+```
+
+### React Native Safe Area Context
+
+> Usually installed with NativeWind dependencies above, but can be installed separately if needed.
+
+```bash
+npm i react-native-safe-area-context
+```
+
+---
+
+## Run Application
 
 ### iOS Simulator
 
@@ -91,29 +109,33 @@ Scan the QR code using:
 
 ---
 
-# Production Build (Later)
+## Production Build (Later)
 
-Using EAS Build:
+### Install EAS CLI
 
 ```bash
 npm install -g eas-cli
 ```
 
+### Login
+
 ```bash
 eas login
 ```
+
+### Configure EAS
 
 ```bash
 eas build:configure
 ```
 
-### Android
+### Android Build
 
 ```bash
 eas build --platform android
 ```
 
-### iOS
+### iOS Build
 
 ```bash
 eas build --platform ios
@@ -121,7 +143,7 @@ eas build --platform ios
 
 ---
 
-# Current Tech Stack
+## Current Tech Stack
 
 - Expo SDK 54
 - React Native
@@ -130,3 +152,5 @@ eas build --platform ios
 - Tailwind CSS
 - React Native Reanimated
 - React Native Safe Area Context
+- clsx
+- EAS Build System
