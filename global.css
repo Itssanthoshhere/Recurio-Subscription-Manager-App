@@ -36,11 +36,22 @@
   --spacing-20: 80px;
   --spacing-24: 96px;
   --spacing-30: 120px;
+}
 
-  --font-sans: sans-regular;
-  --font-sans-light: sans-light;
-  --font-sans-medium: sans-medium;
-  --font-sans-semibold: sans-semibold;
-  --font-sans-bold: sans-bold;
-  --font-sans-extrabold: sans-extrabold;
+@layer components {
+  .tabs-icon {
+    @apply size-12 items-center justify-center;
+  }
+
+  .tabs-pill {
+    @apply size-12 items-center justify-center rounded-full bg-transparent;
+  }
+
+  .tabs-active {
+    @apply bg-accent;
+  }
+
+  .tabs-glyph {
+    @apply size-6;
+  }
 }
