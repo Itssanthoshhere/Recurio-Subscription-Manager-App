@@ -3,14 +3,30 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
 import { useClerk, useUser } from "@clerk/expo";
 import images from "@/constants/images";
+import { useState } from "react";
+
 const SafeAreaView = styled(RNSafeAreaView);
 
 const Settings = () => {
   const { signOut } = useClerk();
   const { user } = useUser();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const handleSignOut = async () => {
-    await signOut(); 
+    if (isSigningOut) return;
+    
+    setIsSigningOut(true);
+    setSignOutError(null);
+    
+    try {
+      await signOut(); 
+    } catch (err: any) {
+      console.error(err);
+      setSignOutError(err.message || "Failed to sign out. Please try again.");
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   const displayName =
@@ -61,7 +77,11 @@ const Settings = () => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {user?.id?.substring(0, 20)}...
+              {user?.id 
+                ? user.id.length > 20 
+                  ? `${user.id.substring(0, 20)}...` 
+                  : user.id 
+                : "No ID"}
             </Text>
           </View>
           <View className="flex-row justify-between items-center py-2">
@@ -78,9 +98,21 @@ const Settings = () => {
       </View>
 
       {/* Sign Out Button */}
-      <Pressable className="auth-button bg-destructive" onPress={handleSignOut}>
-        <Text className="auth-button-text text-white">Sign Out</Text>
+      <Pressable 
+        className={`auth-button bg-destructive ${isSigningOut ? "opacity-50" : ""}`} 
+        onPress={handleSignOut}
+        disabled={isSigningOut}
+      >
+        <Text className="auth-button-text text-white">
+          {isSigningOut ? "Signing out..." : "Sign Out"}
+        </Text>
       </Pressable>
+      
+      {signOutError && (
+        <Text className="text-destructive text-center mt-2 text-sm font-sans-medium">
+          {signOutError}
+        </Text>
+      )}
     </SafeAreaView>
   );
 };

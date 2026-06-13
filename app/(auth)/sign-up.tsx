@@ -56,34 +56,43 @@ const SignUp = () => {
   };
 
   const handleVerify = async () => {
-    await signUp.verifications.verifyEmailCode({
-      code,
-    });
-
-    if (signUp.status === "complete") {
-      await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session?.currentTask);
-            return;
-          }
-
-          const url = decorateUrl("/(tabs)");
-          if (url.startsWith("http")) {
-            // Only use window.location on web platform
-            if (typeof window !== "undefined" && window.location) {
-              window.location.href = url;
-            } else {
-              // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
-            }
-          } else {
-            router.replace(url as Href);
-          }
-        },
+    try {
+      await signUp.verifications.verifyEmailCode({
+        code,
       });
-    } else {
-      console.error("Sign-up attempt not complete:", signUp);
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+      return; // Return early on verification failure
+    }
+
+    try {
+      if (signUp.status === "complete") {
+        await signUp.finalize({
+          navigate: ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              console.log(session?.currentTask);
+              return;
+            }
+
+            const url = decorateUrl("/(tabs)");
+            if (url.startsWith("http")) {
+              // Only use window.location on web platform
+              if (typeof window !== "undefined" && window.location) {
+                window.location.href = url;
+              } else {
+                // On native, just use router navigation
+                router.replace("/(tabs)" as Href);
+              }
+            } else {
+              router.replace(url as Href);
+            }
+          },
+        });
+      } else {
+        console.error("Sign-up attempt not complete:", signUp);
+      }
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
     }
   };
 

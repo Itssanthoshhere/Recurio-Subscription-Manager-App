@@ -71,8 +71,7 @@ const SignIn = () => {
         },
       });
     } else if (signIn.status === "needs_second_factor") {
-      // Handle MFA if needed (not implemented in this basic flow)
-      console.log("MFA required");
+      // The UI will re-render and show the verification form
     } else if (signIn.status === "needs_client_trust") {
       // Send email code for client trust verification
       const emailCodeFactor = signIn.supportedSecondFactors.find(
@@ -88,37 +87,64 @@ const SignIn = () => {
   };
 
   const handleVerify = async () => {
-    await signIn.mfa.verifyEmailCode({ code });
-
-    if (signIn.status === "complete") {
-      await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session?.currentTask);
-            return;
+    try {
+      if (signIn.status === "needs_client_trust") {
+        await signIn.mfa.verifyEmailCode({ code });
+      } else if (signIn.status === "needs_second_factor") {
+        const factor = signIn.supportedSecondFactors?.[0];
+        if (factor) {
+          if (factor.strategy === "totp") {
+            await signIn.mfa.verifyTOTP({ code });
+          } else if (factor.strategy === "phone_code") {
+            await signIn.mfa.verifyPhoneCode({ code });
+          } else if (factor.strategy === "email_code") {
+            await signIn.mfa.verifyEmailCode({ code });
+          } else if (factor.strategy === "backup_code") {
+            await signIn.mfa.verifyBackupCode({ code });
           }
+        }
+      }
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+      return; // Return early on verification failure
+    }
 
-          const url = decorateUrl("/(tabs)");
-          if (url.startsWith("http")) {
-            // Only use window.location on web platform
-            if (typeof window !== "undefined" && window.location) {
-              window.location.href = url;
-            } else {
-              // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
+    try {
+      if (signIn.status === "complete") {
+        await signIn.finalize({
+          navigate: ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              console.log(session?.currentTask);
+              return;
             }
-          } else {
-            router.replace(url as Href);
-          }
-        },
-      });
-    } else {
-      console.error("Sign-in attempt not complete:", signIn);
+
+            const url = decorateUrl("/(tabs)");
+            if (url.startsWith("http")) {
+              // Only use window.location on web platform
+              if (typeof window !== "undefined" && window.location) {
+                window.location.href = url;
+              } else {
+                // On native, just use router navigation
+                router.replace("/(tabs)" as Href);
+              }
+            } else {
+              router.replace(url as Href);
+            }
+          },
+        });
+      } else if (
+        signIn.status !== "needs_second_factor" &&
+        signIn.status !== "needs_client_trust"
+      ) {
+        console.error("Sign-in attempt not complete:", signIn);
+      }
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
     }
   };
 
-  // Show verification screen if client trust is needed
-  if (signIn.status === "needs_client_trust") {
+  // Show verification screen if client trust or second factor is needed
+  if (signIn.status === "needs_client_trust" || signIn.status === "needs_second_factor") {
     return (
       <SafeAreaView className="auth-safe-area">
         <KeyboardAvoidingView
@@ -144,7 +170,9 @@ const SignIn = () => {
                 </View>
                 <Text className="auth-title">Verify your identity</Text>
                 <Text className="auth-subtitle">
-                  We sent a verification code to your email
+                  {signIn.status === "needs_second_factor" 
+                    ? "Please enter your authentication code"
+                    : "We sent a verification code to your email"}
                 </Text>
               </View>
 
@@ -180,15 +208,17 @@ const SignIn = () => {
                     </Text>
                   </Pressable>
 
-                  <Pressable
-                    className="auth-secondary-button"
-                    onPress={() => signIn.mfa.sendEmailCode()}
-                    disabled={fetchStatus === "fetching"}
-                  >
-                    <Text className="auth-secondary-button-text">
-                      Resend Code
-                    </Text>
-                  </Pressable>
+                  {signIn.status === "needs_client_trust" && (
+                    <Pressable
+                      className="auth-secondary-button"
+                      onPress={() => signIn.mfa.sendEmailCode()}
+                      disabled={fetchStatus === "fetching"}
+                    >
+                      <Text className="auth-secondary-button-text">
+                        Resend Code
+                      </Text>
+                    </Pressable>
+                  )}
 
                   <Pressable
                     className="auth-secondary-button"
