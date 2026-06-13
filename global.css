@@ -417,4 +417,34 @@
   .category-chip-text-active {
     @apply text-accent;
   }
+
+  /* ── Start / Onboarding Screen ── */
+
+  .start-screen {
+    @apply flex-1 bg-accent;
+  }
+
+  .start-pattern {
+    @apply w-full flex-1;
+  }
+
+  .start-bottom {
+    @apply items-center px-6 pb-10 pt-8;
+  }
+
+  .start-title {
+    @apply text-center text-4xl font-sans-extrabold text-white;
+  }
+
+  .start-subtitle {
+    @apply mt-3 text-center text-lg font-sans-medium text-white/90;
+  }
+
+  .start-button {
+    @apply mt-8 w-full items-center rounded-full bg-background py-5;
+  }
+
+  .start-button-text {
+    @apply text-lg font-sans-bold text-primary;
+  }
 }
