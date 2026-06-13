@@ -12,4 +12,9 @@ export default {
       },
     },
   },
+  ios: {
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
 };

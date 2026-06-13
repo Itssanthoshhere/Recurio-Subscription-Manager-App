@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Recurio",
-    "slug": "Recurio",
+    "slug": "recurio-subscription-manager-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/logo.png",
@@ -27,7 +27,7 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-   "plugins": [
+    "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
