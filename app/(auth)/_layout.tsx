@@ -10,9 +10,9 @@ export default function AuthLayout() {
     return null;
   }
 
-  // Redirect to home if user is already signed in
+  // Redirect to tabs if user is already signed in
   if (isSignedIn) {
-    return <Redirect href="/" />;
+    return <Redirect href="/(tabs)" />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;
