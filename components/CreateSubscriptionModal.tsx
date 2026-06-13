@@ -7,17 +7,25 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import clsx from "clsx";
-import { icons } from "@/constants/icons";
 import dayjs from "dayjs";
-import { posthog } from "@/src/config/posthog";
+
+interface CreateSubscriptionFormData {
+  name: string;
+  price: number;
+  billing: string;
+  category: string;
+  color: string;
+  icon: string;
+}
 
 interface CreateSubscriptionModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (subscription: Subscription) => void;
+  onSubmit: (formData: CreateSubscriptionFormData) => Promise<void>;
 }
 
 type Frequency = "Monthly" | "Yearly";
@@ -54,6 +62,7 @@ const CreateSubscriptionModal = ({
   const [price, setPrice] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("Monthly");
   const [category, setCategory] = useState<Category>("Other");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Improved price validation
   const isValidPrice = () => {
@@ -64,42 +73,30 @@ const CreateSubscriptionModal = ({
     const numValue = Number(trimmedPrice);
     return Number.isFinite(numValue) && numValue > 0;
   };
-  const isValidForm = name.trim() !== "" && isValidPrice();
+  const isValidForm = name.trim() !== "" && isValidPrice() && !isSubmitting;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isValidForm) return;
 
-    const priceValue = Number(price.trim());
-    const now = dayjs();
-    const renewalDate =
-      frequency === "Monthly" ? now.add(1, "month") : now.add(1, "year");
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        name: name.trim(),
+        price: Number(price.trim()),
+        billing: frequency,
+        category,
+        color: CATEGORY_COLORS[category],
+        icon: "plus", // Default icon key stored in DB
+      });
 
-    const newSubscription: Subscription = {
-      id: `sub-${Date.now()}`,
-      name: name.trim(),
-      price: priceValue,
-      currency: "INR",
-      frequency,
-      category,
-      status: "active",
-      startDate: now.toISOString(),
-      renewalDate: renewalDate.toISOString(),
-      icon: icons.plus,
-      billing: frequency,
-      color: CATEGORY_COLORS[category],
-    };
-
-    onSubmit(newSubscription);
-
-    posthog.capture("subscription_created", {
-      subscription_name: name.trim(),
-      subscription_price: priceValue,
-      subscription_frequency: frequency,
-      subscription_category: category,
-    });
-
-    resetForm();
-    onClose();
+      resetForm();
+      onClose();
+    } catch (err) {
+      console.error("Subscription creation failed:", err);
+      // Keep the modal open so user can retry
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -110,6 +107,7 @@ const CreateSubscriptionModal = ({
   };
 
   const handleClose = () => {
+    if (isSubmitting) return; // Don't close while submitting
     resetForm();
     onClose();
   };
@@ -152,6 +150,7 @@ const CreateSubscriptionModal = ({
                   placeholderTextColor="rgba(0, 0, 0, 0.4)"
                   value={name}
                   onChangeText={setName}
+                  editable={!isSubmitting}
                 />
               </View>
 
@@ -164,6 +163,7 @@ const CreateSubscriptionModal = ({
                   value={price}
                   onChangeText={setPrice}
                   keyboardType="decimal-pad"
+                  editable={!isSubmitting}
                 />
               </View>
 
@@ -176,6 +176,7 @@ const CreateSubscriptionModal = ({
                       frequency === "Monthly" && "picker-option-active",
                     )}
                     onPress={() => setFrequency("Monthly")}
+                    disabled={isSubmitting}
                   >
                     <Text
                       className={clsx(
@@ -192,6 +193,7 @@ const CreateSubscriptionModal = ({
                       frequency === "Yearly" && "picker-option-active",
                     )}
                     onPress={() => setFrequency("Yearly")}
+                    disabled={isSubmitting}
                   >
                     <Text
                       className={clsx(
@@ -216,6 +218,7 @@ const CreateSubscriptionModal = ({
                         category === cat && "category-chip-active",
                       )}
                       onPress={() => setCategory(cat)}
+                      disabled={isSubmitting}
                     >
                       <Text
                         className={clsx(
@@ -238,7 +241,11 @@ const CreateSubscriptionModal = ({
                 onPress={handleSubmit}
                 disabled={!isValidForm}
               >
-                <Text className="auth-button-text">Create Subscription</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text className="auth-button-text">Create Subscription</Text>
+                )}
               </Pressable>
             </ScrollView>
           </Pressable>
