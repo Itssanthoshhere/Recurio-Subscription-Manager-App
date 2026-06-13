@@ -1,15 +1,46 @@
 import { create } from "zustand";
-import { HOME_SUBSCRIPTIONS } from "@/constants/data";
+import { Database } from "@/src/types/database.types";
+
+export type SubscriptionRow = Database["public"]["Tables"]["subscriptions"]["Row"];
+export type SubscriptionInsert = Database["public"]["Tables"]["subscriptions"]["Insert"];
 
 interface SubscriptionStore {
-  subscriptions: Subscription[];
-  addSubscription: (subscription: Subscription) => void;
-  setSubscriptions: (subscriptions: Subscription[]) => void;
+  subscriptions: SubscriptionRow[];
+  isLoading: boolean;
+  error: string | null;
+  
+  // Actions
+  setSubscriptions: (subscriptions: SubscriptionRow[]) => void;
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: string | null) => void;
+  
+  // Optimistic UI updates
+  optimisticAdd: (subscription: SubscriptionRow) => void;
+  optimisticUpdate: (id: string, updates: Partial<SubscriptionRow>) => void;
+  optimisticDelete: (id: string) => void;
 }
 
 export const useSubscriptionStore = create<SubscriptionStore>((set) => ({
-  subscriptions: HOME_SUBSCRIPTIONS,
-  addSubscription: (subscription) =>
+  subscriptions: [],
+  isLoading: true,
+  error: null,
+
+  setSubscriptions: (subscriptions) => set({ subscriptions, isLoading: false, error: null }),
+  setLoading: (isLoading) => set({ isLoading }),
+  setError: (error) => set({ error, isLoading: false }),
+
+  optimisticAdd: (subscription) =>
     set((state) => ({ subscriptions: [subscription, ...state.subscriptions] })),
-  setSubscriptions: (subscriptions) => set({ subscriptions }),
+
+  optimisticUpdate: (id, updates) =>
+    set((state) => ({
+      subscriptions: state.subscriptions.map((sub) =>
+        sub.id === id ? { ...sub, ...updates } : sub
+      ),
+    })),
+
+  optimisticDelete: (id) =>
+    set((state) => ({
+      subscriptions: state.subscriptions.filter((sub) => sub.id !== id),
+    })),
 }));
