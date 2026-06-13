@@ -8,9 +8,12 @@ const SubscriptionDetails = () => {
   const posthog = usePostHog();
 
   useEffect(() => {
-    posthog.capture("subscription_details_viewed", {
-      subscription_id: id,
-    });
+    // Only capture if id is valid
+    if (id && typeof id === 'string' && id.trim()) {
+      posthog.capture("subscription_details_viewed", {
+        subscription_id: id,
+      });
+    }
   }, [id, posthog]);
 
   return (

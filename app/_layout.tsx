@@ -52,9 +52,17 @@ function RootLayoutContent() {
   // Manual screen tracking for Expo Router
   useEffect(() => {
     if (previousPathname.current !== pathname) {
+      // Filter route params to avoid leaking sensitive data
+      const sanitizedParams = Object.keys(params).reduce((acc, key) => {
+        // Only include specific safe params
+        if (['id', 'tab', 'view'].includes(key)) {
+          acc[key] = params[key];
+        }
+        return acc;
+      }, {} as Record<string, string | string[]>);
       posthog.screen(pathname, {
         previous_screen: previousPathname.current ?? null,
-        ...params,
+        ...sanitizedParams,
       });
       previousPathname.current = pathname;
     }

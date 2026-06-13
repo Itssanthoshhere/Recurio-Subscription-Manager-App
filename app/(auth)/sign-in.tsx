@@ -124,9 +124,12 @@ const SignIn = () => {
 
     try {
       if (signIn.status === "complete") {
-        posthog.capture("user_signed_in", {
-          method: "mfa",
+        // Track successful sign-in after verification
+        posthog.identify(emailAddress, {
+          $set: { email: emailAddress },
+          $set_once: { first_sign_in_date: new Date().toISOString() },
         });
+        posthog.capture('user_signed_in', { email: emailAddress });
 
         await signIn.finalize({
           navigate: ({ session, decorateUrl }) => {
