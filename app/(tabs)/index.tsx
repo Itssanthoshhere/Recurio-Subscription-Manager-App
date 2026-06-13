@@ -31,11 +31,53 @@ export default function App() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { subscriptions, isLoading, error, addSubscription } = useSubscriptions();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [sortOrder, setSortOrder] = useState<"newest" | "price_desc" | "price_asc" | "renewal_asc">("newest");
+
   // Map DB rows to UI types
-  const uiSubscriptions: Subscription[] = useMemo(
+  const allUiSubscriptions: Subscription[] = useMemo(
     () => subscriptions.map(mapRowToSubscription),
     [subscriptions],
   );
+
+  // Apply Search, Filter, and Sort
+  const filteredSubscriptions = useMemo(() => {
+    let result = [...allUiSubscriptions];
+
+    // Search
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(sub => 
+        sub.name.toLowerCase().includes(lowerQuery) || 
+        (sub.category && sub.category.toLowerCase().includes(lowerQuery))
+      );
+    }
+
+    // Filter
+    if (selectedCategory !== "All") {
+      result = result.filter(sub => sub.category === selectedCategory);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortOrder) {
+        case "price_desc":
+          return b.price - a.price;
+        case "price_asc":
+          return a.price - b.price;
+        case "renewal_asc":
+          if (!a.renewalDate) return 1;
+          if (!b.renewalDate) return -1;
+          return dayjs(a.renewalDate).diff(dayjs(b.renewalDate));
+        case "newest":
+        default:
+          return 0; // The original DB fetch order is usually created_at desc if we set it up, but here we'll just keep stable or rely on history map
+      }
+    });
+
+    return result;
+  }, [allUiSubscriptions, searchQuery, selectedCategory, sortOrder]);
 
   // Compute total monthly spending from live data
   const totalMonthlySpending = useMemo(() => {
@@ -154,6 +196,8 @@ export default function App() {
     );
   }
 
+  const categories = ["All", ...Array.from(new Set(allUiSubscriptions.map(s => s.category).filter(Boolean)))];
+
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
       <FlatList
@@ -161,10 +205,6 @@ export default function App() {
           <>
             <View className="home-header">
               <View className="home-user">
-                {/* <Image source={images.avatar} className="home-avatar" />
-
-                <Text className="home-user-name">{HOME_USER.name}</Text> */}
-
                 <Image
                   source={
                     user?.imageUrl ? { uri: user.imageUrl } : images.avatar
@@ -174,7 +214,6 @@ export default function App() {
                 <Text className="home-user-name">{displayName}</Text>
               </View>
 
-              {/* <Image source={icons.add} className="home-add-icon" /> */}
               <Pressable onPress={() => setIsModalVisible(true)}>
                 <Image source={icons.add} className="home-add-icon" />
               </Pressable>
@@ -214,9 +253,63 @@ export default function App() {
             </View>
 
             <ListHeading title="All Subscriptions" />
+            
+            {/* Search and Filters */}
+            <View className="mb-4 space-y-3">
+              <View className="flex-row items-center bg-card rounded-full px-4 py-3 border border-border shadow-sm">
+                <Feather name="search" size={20} color="#081126" className="opacity-50" />
+                <TextInput 
+                  className="flex-1 ml-3 font-sans-medium text-primary"
+                  placeholder="Search subscriptions..."
+                  placeholderTextColor="rgba(8, 17, 38, 0.4)"
+                  value={searchQuery}
+                  onChangeText={(text) => {
+                    setSearchQuery(text);
+                    if (text.length > 2) posthog.capture('search_performed', { query: text });
+                  }}
+                />
+                {searchQuery.length > 0 && (
+                  <Pressable onPress={() => setSearchQuery("")}>
+                    <Feather name="x-circle" size={18} color="#081126" className="opacity-50" />
+                  </Pressable>
+                )}
+              </View>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row" contentContainerStyle={{ gap: 8 }}>
+                {categories.map((cat) => (
+                  <Pressable
+                    key={cat}
+                    onPress={() => {
+                      setSelectedCategory(cat as string);
+                      posthog.capture('filter_applied', { category: cat });
+                    }}
+                    className={`px-4 py-2 rounded-full border ${selectedCategory === cat ? 'bg-accent border-accent' : 'bg-card border-border'}`}
+                  >
+                    <Text className={`font-sans-bold text-sm ${selectedCategory === cat ? 'text-white' : 'text-primary'}`}>
+                      {cat}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              
+              <View className="flex-row justify-between items-center mt-2 px-1">
+                <Text className="text-xs font-sans-medium text-primary/60">Sort by:</Text>
+                <View className="flex-row gap-3">
+                   <Pressable onPress={() => setSortOrder("newest")}>
+                     <Text className={`text-xs font-sans-bold ${sortOrder === "newest" ? "text-accent" : "text-primary/60"}`}>Newest</Text>
+                   </Pressable>
+                   <Pressable onPress={() => setSortOrder("price_desc")}>
+                     <Text className={`text-xs font-sans-bold ${sortOrder === "price_desc" ? "text-accent" : "text-primary/60"}`}>Highest Cost</Text>
+                   </Pressable>
+                   <Pressable onPress={() => setSortOrder("renewal_asc")}>
+                     <Text className={`text-xs font-sans-bold ${sortOrder === "renewal_asc" ? "text-accent" : "text-primary/60"}`}>Renewal</Text>
+                   </Pressable>
+                </View>
+              </View>
+            </View>
           </>
         )}
-        data={uiSubscriptions}
+        data={filteredSubscriptions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <SubscriptionCard
