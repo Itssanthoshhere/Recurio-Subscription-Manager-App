@@ -56,6 +56,12 @@ npx expo customize metro.config.js
 npm i clsx
 ```
 
+### Day.js (Date & Time Management)
+
+```bash
+npm install dayjs
+```
+
 ### React Native Safe Area Context
 
 > Usually installed with NativeWind dependencies above, but can be installed separately if needed.
