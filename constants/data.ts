@@ -105,3 +105,53 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
     color: "#b8e8d0",
   },
 ];
+
+export const CHART_DATA = [
+  { day: "Mon", value: 36, active: false },
+  { day: "Tue", value: 32, active: false },
+  { day: "Wed", value: 24, active: false },
+  { day: "Thr", value: 42, active: true },
+  { day: "Fri", value: 35, active: false },
+  { day: "Sat", value: 22, active: false },
+  { day: "Sun", value: 24, active: false },
+];
+
+export const INSIGHTS_EXPENSES = {
+  amount: 424.63,
+  currency: "INR", // Changed from USD to INR
+  date: "March 2026",
+  growth: "+12%",
+};
+
+export const INSIGHTS_HISTORY: Subscription[] = [
+  {
+    id: "claude-pro-insight",
+    icon: icons.claude,
+    name: "Claude",
+    plan: "",
+    category: "AI Tools",
+    paymentMethod: "",
+    status: "active",
+    startDate: "2025-06-25T12:00:00.000Z",
+    price: 9.84,
+    currency: "INR",
+    billing: "per month",
+    renewalDate: "2026-06-25T12:00:00.000Z", // Using June 25, 12:00
+    color: "#f5c542", // Yellow
+  },
+  {
+    id: "canva-pro-insight",
+    icon: icons.canva,
+    name: "Canva",
+    plan: "",
+    category: "Design",
+    paymentMethod: "",
+    status: "active",
+    startDate: "2025-06-30T16:00:00.000Z",
+    price: 43.89,
+    currency: "INR",
+    billing: "per month",
+    renewalDate: "2026-06-30T16:00:00.000Z", // June 30, 16:00
+    color: "#8fd1bd", // Mint from the theme
+  },
+];
