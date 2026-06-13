@@ -1,6 +1,6 @@
-# Welcome to your Expo app 👋
+# Recurio - Subscription Tracker 📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is an [Expo](https://expo.dev) project with Clerk authentication for managing your subscriptions.
 
 ## Get started
 
@@ -10,7 +10,17 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Set up environment variables
+
+   Copy `.env.example` to `.env` and add your Clerk publishable key:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Then edit `.env` and replace `pk_live_REPLACE_ME` with your actual Clerk publishable key from [Clerk Dashboard](https://dashboard.clerk.com/~/api-keys).
+
+3. Start the app
 
    ```bash
    npx expo start
@@ -24,6 +34,33 @@ In the output, you'll find options to open the app in a
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Environment Variables & Production Deployment
+
+### Local Development
+
+- Copy `.env.example` to `.env`
+- Add your Clerk publishable key
+- **Never commit `.env` to version control**
+
+### Production Builds with EAS
+
+For production builds, configure environment secrets in EAS:
+
+```bash
+# Install EAS CLI
+npm install -g eas-cli
+
+# Login to your Expo account
+eas login
+
+# Configure secrets
+eas secret:create --scope project --name EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY --value your_production_key_here
+```
+
+The app will automatically read `process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` at runtime. No hardcoded keys are used in production.
+
+For CI/CD pipelines, inject the secret via your platform's environment configuration (GitHub Actions, CircleCI, etc.).
 
 ## Get a fresh project
 
