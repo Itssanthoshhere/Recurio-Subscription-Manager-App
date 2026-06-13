@@ -12,12 +12,14 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -45,10 +47,18 @@ const SignIn = () => {
 
     if (error) {
       console.error(JSON.stringify(error, null, 2));
+      posthog.capture("sign_in_failed", {
+        error_code: error.code,
+        error_message: error.message,
+      });
       return;
     }
 
     if (signIn.status === "complete") {
+      posthog.capture("user_signed_in", {
+        method: "password",
+      });
+
       await signIn.finalize({
         navigate: ({ session, decorateUrl }) => {
           if (session?.currentTask) {
@@ -106,11 +116,18 @@ const SignIn = () => {
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
+      posthog.capture("sign_in_failed", {
+        method: "mfa_verification",
+      });
       return; // Return early on verification failure
     }
 
     try {
       if (signIn.status === "complete") {
+        posthog.capture("user_signed_in", {
+          method: "mfa",
+        });
+
         await signIn.finalize({
           navigate: ({ session, decorateUrl }) => {
             if (session?.currentTask) {
@@ -170,7 +187,7 @@ const SignIn = () => {
                 </View>
                 <Text className="auth-title">Verify your identity</Text>
                 <Text className="auth-subtitle">
-                  {signIn.status === "needs_second_factor" 
+                  {signIn.status === "needs_second_factor"
                     ? "Please enter your authentication code"
                     : "We sent a verification code to your email"}
                 </Text>
@@ -332,7 +349,7 @@ const SignIn = () => {
 
             {/* Sign-Up Link */}
             <View className="auth-link-row">
-              <Text className="auth-link-copy">Don't have an account?</Text>
+              <Text className="auth-link-copy">{"Don't have an account?"}</Text>
               <Link href="/(auth)/sign-up" asChild>
                 <Pressable>
                   <Text className="auth-link">Create Account</Text>
