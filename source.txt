@@ -171,3 +171,5 @@ eas build --platform ios
 - Clerk Authentication
 - PostHog Analytics
 - EAS Build System
+
+npx expo install react-native-svg
