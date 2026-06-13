@@ -1,17 +1,19 @@
 {
   "expo": {
-    "name": "recurio-subscription-manager-app",
-    "slug": "recurio-subscription-manager-app",
+    "name": "Recurio",
+    "slug": "Recurio",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/logo.png",
     "scheme": "recuriosubscriptionmanagerapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.itssanthoshhere.recurio",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.itssanthoshhere.recurio",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -25,7 +27,7 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
+   "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
