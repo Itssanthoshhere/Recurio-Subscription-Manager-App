@@ -25,9 +25,11 @@ export const useSubscriptions = () => {
     }
 
     const fetchSubscriptions = async () => {
+      // Create a fresh instance here to avoid dependency cycle with getToken
+      const service = new SubscriptionService(createClerkSupabaseClient(getToken));
       store.setLoading(true);
       try {
-        const data = await subscriptionService.getSubscriptions();
+        const data = await service.getSubscriptions();
         store.setSubscriptions(data);
       } catch (error: any) {
         store.setError(error.message);
@@ -35,7 +37,8 @@ export const useSubscriptions = () => {
     };
 
     fetchSubscriptions();
-  }, [isLoaded, isSignedIn, subscriptionService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, isSignedIn]);
 
   // Expose CRUD actions that handle the DB call + optimistic UI
   const addSubscription = async (subscription: Omit<SubscriptionInsert, 'user_id' | 'id' | 'created_at' | 'updated_at'>) => {

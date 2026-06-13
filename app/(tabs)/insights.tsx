@@ -68,6 +68,11 @@ const Insights = () => {
     );
   }
 
+  if (subscriptions.length === 0) {
+    // If there's an error in fetching, the length will be 0. We can just show a friendly message or the actual error if we exposed it.
+    // For now, let's gracefully handle empty state.
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Header */}

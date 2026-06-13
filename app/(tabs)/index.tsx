@@ -17,6 +17,7 @@ import { mapRowToSubscription, mapRowToUpcoming } from "@/src/utils/mappers";
 
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
+import Feather from "@expo/vector-icons/Feather";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -134,6 +135,20 @@ export default function App() {
         <ActivityIndicator size="large" color="#ea7a53" />
         <Text className="mt-4 text-sm font-sans-medium text-primary/60">
           Loading subscriptions...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 bg-background items-center justify-center p-5">
+        <Feather name="alert-circle" size={40} color="#ef4444" />
+        <Text className="mt-4 text-base font-sans-bold text-red-500 text-center">
+          Failed to load subscriptions
+        </Text>
+        <Text className="mt-2 text-sm font-sans-medium text-primary/60 text-center">
+          {error}
         </Text>
       </SafeAreaView>
     );
