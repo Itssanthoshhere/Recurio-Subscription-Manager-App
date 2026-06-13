@@ -4,23 +4,26 @@ import { styled } from "nativewind";
 import { useClerk, useUser } from "@clerk/expo";
 import images from "@/constants/images";
 import { useState } from "react";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const Settings = () => {
   const { signOut } = useClerk();
   const { user } = useUser();
+  const posthog = usePostHog();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     if (isSigningOut) return;
-    
+
     setIsSigningOut(true);
     setSignOutError(null);
-    
+
     try {
-      await signOut(); 
+      posthog.capture("user_signed_out");
+      await signOut();
     } catch (err: any) {
       console.error(err);
       setSignOutError(err.message || "Failed to sign out. Please try again.");

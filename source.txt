@@ -70,6 +70,14 @@ npm install dayjs
 npm i react-native-safe-area-context
 ```
 
+### PostHog Analytics Setup
+
+```bash
+npx -y @posthog/wizard@latest
+```
+
+> Follow the wizard prompts to integrate PostHog analytics, event tracking, and product analytics into the Recurio application.
+
 ---
 
 ## Run Application
@@ -159,4 +167,7 @@ eas build --platform ios
 - React Native Reanimated
 - React Native Safe Area Context
 - clsx
+- Day.js
+- Clerk Authentication
+- PostHog Analytics
 - EAS Build System
