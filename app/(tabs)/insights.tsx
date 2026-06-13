@@ -95,7 +95,7 @@ const Insights = () => {
         <View className="insights-section">
           <View className="insights-section-header">
             <Text className="insights-section-title">Upcoming 7 Days</Text>
-            <Pressable className="insights-view-all">
+            <Pressable className="insights-view-all" onPress={() => router.push('/(tabs)')}>
               <Text className="insights-view-all-text">View all</Text>
             </Pressable>
           </View>
@@ -121,7 +121,7 @@ const Insights = () => {
         <View className="insights-section">
           <View className="insights-section-header">
             <Text className="insights-section-title">History</Text>
-            <Pressable className="insights-view-all">
+            <Pressable className="insights-view-all" onPress={() => router.push('/(tabs)')}>
               <Text className="insights-view-all-text">View all</Text>
             </Pressable>
           </View>

@@ -1,6 +1,6 @@
 import "@/global.css";
 
-import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import images from "@/constants/images";
 import { icons } from "@/constants/icons";
 import { formatCurrency } from "@/lib/utils";
@@ -255,7 +255,7 @@ export default function App() {
             <ListHeading title="All Subscriptions" />
             
             {/* Search and Filters */}
-            <View className="mb-4 space-y-3">
+            <View className="mt-5 mb-4 space-y-3">
               <View className="flex-row items-center bg-card rounded-full px-4 py-3 border border-border shadow-sm">
                 <Feather name="search" size={20} color="#081126" className="opacity-50" />
                 <TextInput 
