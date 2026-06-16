@@ -1,5 +1,5 @@
-import { View, Text, Image, Pressable } from "react-native";
-import React from "react";
+import { View, Text, Image, Pressable, ImageSourcePropType } from "react-native";
+import React, { useState } from "react";
 import {
   formatCurrency,
   formatStatusLabel,
@@ -23,6 +23,11 @@ const SubscriptionCard = ({
   startDate,
   status,
 }: SubscriptionCardProps) => {
+  const [iconError, setIconError] = useState(false);
+
+  // Check if icon is a remote URI
+  const isRemoteIcon = icon && typeof icon === 'object' && 'uri' in icon;
+
   return (
     <Pressable
       onPress={onPress}
@@ -31,7 +36,22 @@ const SubscriptionCard = ({
     >
       <View className="sub-head">
         <View className="sub-main">
-          <Image source={icon} className="sub-icon" />
+          {iconError || !icon ? (
+            <View
+              className="sub-icon items-center justify-center"
+              style={{ backgroundColor: color || '#6C63FF', borderRadius: 12 }}
+            >
+              <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
+                {name?.charAt(0)?.toUpperCase() || '?'}
+              </Text>
+            </View>
+          ) : (
+            <Image
+              source={icon}
+              className="sub-icon"
+              onError={() => setIconError(true)}
+            />
+          )}
           <View className="sub-copy">
             <Text numberOfLines={1} className="sub-title">
               {name}

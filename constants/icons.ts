@@ -11,6 +11,7 @@ import home from "@/assets/icons/home.png";
 import medium from "@/assets/icons/medium.png";
 import menu from "@/assets/icons/menu.png";
 import music from "@/assets/icons/music.png";
+import netflix from "@/assets/icons/netflix.png";
 import notion from "@/assets/icons/notion.png";
 import openai from "@/assets/icons/openai.png";
 import plus from "@/assets/icons/plus.png";
@@ -25,6 +26,8 @@ export const icons = {
   add,
   back,
   menu,
+  music,
+  netflix,
   plus,
   notion,
   dropbox,
@@ -32,7 +35,6 @@ export const icons = {
   adobe,
   medium,
   figma,
-  music,
   github,
   claude,
   canva,

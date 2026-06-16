@@ -9,6 +9,13 @@ import { icons, IconKey } from '@/constants/icons';
 const resolveIcon = (iconKey: string | null, name?: string): ImageSourcePropType => {
   if (iconKey) {
     if (iconKey.startsWith('http')) {
+      // Rewrite dead Clearbit URLs to Logo.dev
+      if (iconKey.includes('logo.clearbit.com/')) {
+        const domain = iconKey.split('logo.clearbit.com/')[1]?.split('?')[0];
+        if (domain) {
+          return { uri: `https://img.logo.dev/${domain}?token=pk_a8tfHR90SISyhJMqlFOFTA&size=120&format=png` };
+        }
+      }
       return { uri: iconKey };
     }
     if (iconKey in icons && iconKey !== 'plus') {
@@ -19,6 +26,7 @@ const resolveIcon = (iconKey: string | null, name?: string): ImageSourcePropType
   // Fallback: guess from name if icon is 'plus' or null
   if (name) {
     const n = String(name).toLowerCase().trim();
+    if (n.includes("netflix")) return icons.netflix;
     if (n.includes("notion")) return icons.notion;
     if (n.includes("dropbox")) return icons.dropbox;
     if (n.includes("chatgpt") || n.includes("openai")) return icons.openai;
@@ -28,10 +36,11 @@ const resolveIcon = (iconKey: string | null, name?: string): ImageSourcePropType
     if (n.includes("github") || n.includes("copilot")) return icons.github;
     if (n.includes("claude") || n.includes("anthropic")) return icons.claude;
     if (n.includes("canva")) return icons.canva;
+    if (n.includes("apple music") || n.includes("spotify") || n.includes("music")) return icons.music;
     
-    // Auto-fetch logo using Clearbit API
+    // Auto-fetch logo using Logo.dev (Clearbit successor)
     const domain = n.replace(/\s+/g, '') + ".com";
-    return { uri: `https://logo.clearbit.com/${domain}` };
+    return { uri: `https://img.logo.dev/${domain}?token=pk_a8tfHR90SISyhJMqlFOFTA&size=120&format=png` };
   }
 
   return icons.plus;
