@@ -41,6 +41,7 @@ interface CreateSubscriptionModalProps {
     startDate?: string;
     renewalDate?: string;
     paymentMethod?: string;
+    color?: string;
   } | null;
 }
 
@@ -71,6 +72,19 @@ const CATEGORY_COLORS: Record<Category, string> = {
   Other: "#d4d4d4",
 };
 
+const AVAILABLE_COLORS = [
+  "#ff6b6b", // Coral
+  "#ff9f43", // Orange
+  "#f5c542", // Gold
+  "#2ee59d", // Green
+  "#54a0ff", // Blue
+  "#5f27cd", // Violet
+  "#e8def8", // Lavender
+  "#ff9ff3", // Pink
+  "#95e1d3", // Teal
+  "#d4d4d4", // Grey
+];
+
 const DATE_FORMAT = "DD/MM/YYYY";
 
 const toDisplayDate = (iso: string) => dayjs(iso).format(DATE_FORMAT);
@@ -93,6 +107,7 @@ const CreateSubscriptionModal = ({
   const [price, setPrice] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("Monthly");
   const [category, setCategory] = useState<Category>("Other");
+  const [color, setColor] = useState("#d4d4d4");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startDateInput, setStartDateInput] = useState(toDisplayDate(now.toISOString()));
   const [renewalDateInput, setRenewalDateInput] = useState(toDisplayDate(now.add(1, "month").toISOString()));
@@ -105,6 +120,7 @@ const CreateSubscriptionModal = ({
         setPrice(String(subscriptionToEdit.price));
         setFrequency((subscriptionToEdit.billing === "Yearly" ? "Yearly" : "Monthly") as Frequency);
         setCategory((subscriptionToEdit.category || "Other") as Category);
+        setColor(subscriptionToEdit.color || CATEGORY_COLORS[(subscriptionToEdit.category || "Other") as Category]);
         setPaymentMethod(subscriptionToEdit.paymentMethod || "");
         if (subscriptionToEdit.startDate) {
           setStartDateInput(toDisplayDate(subscriptionToEdit.startDate));
@@ -190,7 +206,7 @@ const CreateSubscriptionModal = ({
         price: Number(price.trim()),
         billing: frequency,
         category,
-        color: CATEGORY_COLORS[category],
+        color: color,
         icon: determineIcon(name, category),
         startDate: startIso,
         renewalDate: renewalIso,
@@ -212,6 +228,7 @@ const CreateSubscriptionModal = ({
     setPrice("");
     setFrequency("Monthly");
     setCategory("Other");
+    setColor("#d4d4d4");
     setPaymentMethod("");
     setStartDateInput(toDisplayDate(n.toISOString()));
     setRenewalDateInput(toDisplayDate(n.add(1, "month").toISOString()));
@@ -334,7 +351,10 @@ const CreateSubscriptionModal = ({
                         "category-chip",
                         category === cat && "category-chip-active",
                       )}
-                      onPress={() => setCategory(cat)}
+                      onPress={() => {
+                        setCategory(cat);
+                        setColor(CATEGORY_COLORS[cat]);
+                      }}
                       disabled={isSubmitting}
                     >
                       <Text
@@ -345,6 +365,28 @@ const CreateSubscriptionModal = ({
                       >
                         {cat}
                       </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+
+              {/* Color Picker */}
+              <View className="auth-field">
+                <Text className="auth-label">Card Color</Text>
+                <View className="flex-row flex-wrap gap-2.5 mt-2">
+                  {AVAILABLE_COLORS.map((c) => (
+                    <Pressable
+                      key={c}
+                      onPress={() => setColor(c)}
+                      className={clsx(
+                        "size-8 rounded-full border border-black/10 items-center justify-center",
+                        color === c && "border-2 border-[#081126] scale-110"
+                      )}
+                      style={{ backgroundColor: c }}
+                    >
+                      {color === c && (
+                        <View className="size-2 rounded-full bg-white shadow-sm" />
+                      )}
                     </Pressable>
                   ))}
                 </View>

@@ -209,6 +209,7 @@ const SubscriptionDetails = () => {
           startDate: subscription.start_date ?? undefined,
           renewalDate: subscription.renewal_date ?? undefined,
           paymentMethod: subscription.payment_method ?? undefined,
+          color: subscription.color ?? undefined,
         } : null}
       />
     </SafeAreaView>
