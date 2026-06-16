@@ -18,7 +18,7 @@ const resolveIcon = (iconKey: string | null, name?: string): ImageSourcePropType
 
   // Fallback: guess from name if icon is 'plus' or null
   if (name) {
-    const n = name.toLowerCase().trim();
+    const n = String(name).toLowerCase().trim();
     if (n.includes("notion")) return icons.notion;
     if (n.includes("dropbox")) return icons.dropbox;
     if (n.includes("chatgpt") || n.includes("openai")) return icons.openai;
