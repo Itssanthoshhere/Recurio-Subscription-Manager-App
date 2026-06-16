@@ -78,6 +78,30 @@ npx -y @posthog/wizard@latest
 
 > Follow the wizard prompts to integrate PostHog analytics, event tracking, and product analytics into the Recurio application.
 
+### SVG Image Support
+
+```bash
+npx expo install react-native-svg
+```
+
+### Clerk Authentication
+
+```bash
+npx expo install @clerk/expo
+```
+
+### Supabase Backend Database client
+
+```bash
+npm install @supabase/supabase-js
+```
+
+### Expo Secure Store, Notifications, and Haptics
+
+```bash
+npx expo install expo-secure-store expo-notifications expo-haptics
+```
+
 ---
 
 ## Run Application
@@ -169,7 +193,10 @@ eas build --platform ios
 - clsx
 - Day.js
 - Clerk Authentication
+- Supabase Integration
 - PostHog Analytics
 - EAS Build System
-
-npx expo install react-native-svg
+- React Native SVG
+- Expo Secure Store
+- Expo Notifications
+- Expo Haptics
