@@ -25,6 +25,7 @@ interface CreateSubscriptionFormData {
   icon: string;
   startDate: string; // ISO string
   renewalDate: string; // ISO string
+  paymentMethod?: string;
 }
 
 interface CreateSubscriptionModalProps {
@@ -84,6 +85,7 @@ const CreateSubscriptionModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startDateInput, setStartDateInput] = useState(toDisplayDate(now.toISOString()));
   const [renewalDateInput, setRenewalDateInput] = useState(toDisplayDate(now.add(1, "month").toISOString()));
+  const [paymentMethod, setPaymentMethod] = useState("");
 
   // Auto-update renewal date when frequency or start date changes
   const handleStartDateChange = (text: string) => {
@@ -161,6 +163,7 @@ const CreateSubscriptionModal = ({
         icon: determineIcon(name, category),
         startDate: startIso,
         renewalDate: renewalIso,
+        paymentMethod: paymentMethod.trim() || undefined,
       });
 
       resetForm();
@@ -178,6 +181,7 @@ const CreateSubscriptionModal = ({
     setPrice("");
     setFrequency("Monthly");
     setCategory("Other");
+    setPaymentMethod("");
     setStartDateInput(toDisplayDate(n.toISOString()));
     setRenewalDateInput(toDisplayDate(n.add(1, "month").toISOString()));
   };
@@ -311,6 +315,19 @@ const CreateSubscriptionModal = ({
                     </Pressable>
                   ))}
                 </View>
+              </View>
+
+              {/* Payment Method */}
+              <View className="auth-field">
+                <Text className="auth-label">Payment Method (Optional)</Text>
+                <TextInput
+                  className="auth-input"
+                  placeholder="e.g. Visa ending in 8530"
+                  placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                  value={paymentMethod}
+                  onChangeText={setPaymentMethod}
+                  editable={!isSubmitting}
+                />
               </View>
 
               {/* Start Date */}

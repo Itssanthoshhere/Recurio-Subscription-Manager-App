@@ -134,6 +134,7 @@ export default function App() {
       icon: string;
       startDate: string;
       renewalDate: string;
+      paymentMethod?: string;
     }) => {
       try {
         await addSubscription({
@@ -147,6 +148,7 @@ export default function App() {
           renewal_date: formData.renewalDate,
           color: formData.color,
           icon: formData.icon,
+          payment_method: formData.paymentMethod || null,
         });
 
         posthog.capture("subscription_created", {
