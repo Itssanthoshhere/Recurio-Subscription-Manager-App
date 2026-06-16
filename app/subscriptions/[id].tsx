@@ -120,11 +120,11 @@ const SubscriptionDetails = () => {
       {/* Header */}
       <View className="px-5 py-4 flex-row items-center justify-between border-b border-border">
         <Pressable onPress={() => router.back()} className="size-10 items-center justify-center rounded-full border border-border bg-background">
-          <Feather name="chevron-left" className="text-primary" size={24} />
+          <Feather name="chevron-left" size={24} color="#081126" />
         </Pressable>
         <Text className="text-xl font-sans-bold text-primary">Details</Text>
         <Pressable onPress={() => setIsEditModalVisible(true)} className="size-10 items-center justify-center rounded-full border border-border bg-background">
-          <Feather name="edit-2" className="text-primary" size={18} />
+          <Feather name="edit-2" size={18} color="#081126" />
         </Pressable>
       </View>
 
