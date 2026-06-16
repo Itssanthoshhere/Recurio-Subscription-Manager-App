@@ -6,15 +6,34 @@ import { icons, IconKey } from '@/constants/icons';
  * Maps the icon string stored in the database to the local ImageSourcePropType.
  * Falls back to `icons.plus` if the key is not found.
  */
-const resolveIcon = (iconKey: string | null): ImageSourcePropType => {
+const resolveIcon = (iconKey: string | null, name?: string): ImageSourcePropType => {
   if (iconKey) {
     if (iconKey.startsWith('http')) {
       return { uri: iconKey };
     }
-    if (iconKey in icons) {
+    if (iconKey in icons && iconKey !== 'plus') {
       return icons[iconKey as IconKey];
     }
   }
+
+  // Fallback: guess from name if icon is 'plus' or null
+  if (name) {
+    const n = name.toLowerCase().trim();
+    if (n.includes("notion")) return icons.notion;
+    if (n.includes("dropbox")) return icons.dropbox;
+    if (n.includes("chatgpt") || n.includes("openai")) return icons.openai;
+    if (n.includes("adobe") || n.includes("creative cloud")) return icons.adobe;
+    if (n.includes("medium")) return icons.medium;
+    if (n.includes("figma")) return icons.figma;
+    if (n.includes("github") || n.includes("copilot")) return icons.github;
+    if (n.includes("claude") || n.includes("anthropic")) return icons.claude;
+    if (n.includes("canva")) return icons.canva;
+    
+    // Auto-fetch logo using Clearbit API
+    const domain = n.replace(/\s+/g, '') + ".com";
+    return { uri: `https://logo.clearbit.com/${domain}` };
+  }
+
   return icons.plus;
 };
 
@@ -33,7 +52,7 @@ export const mapRowToSubscription = (row: SubscriptionRow): Subscription => ({
   renewalDate: row.renewal_date ?? undefined,
   paymentMethod: row.payment_method ?? undefined,
   color: row.color ?? undefined,
-  icon: resolveIcon(row.icon),
+  icon: resolveIcon(row.icon, row.name),
 });
 
 /**
@@ -44,6 +63,6 @@ export const mapRowToUpcoming = (row: SubscriptionRow, daysLeft: number): Upcomi
   name: row.name,
   price: row.price,
   currency: row.currency,
-  icon: resolveIcon(row.icon),
+  icon: resolveIcon(row.icon, row.name),
   daysLeft,
 });
