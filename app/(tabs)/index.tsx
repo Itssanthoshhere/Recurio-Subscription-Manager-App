@@ -130,13 +130,9 @@ export default function App() {
       category: string;
       color: string;
       icon: string;
+      startDate: string;
+      renewalDate: string;
     }) => {
-      const now = dayjs();
-      const renewalDate =
-        formData.billing === "Yearly"
-          ? now.add(1, "year")
-          : now.add(1, "month");
-
       try {
         await addSubscription({
           name: formData.name,
@@ -145,8 +141,8 @@ export default function App() {
           billing: formData.billing,
           category: formData.category,
           status: "active",
-          start_date: now.toISOString(),
-          renewal_date: renewalDate.toISOString(),
+          start_date: formData.startDate,
+          renewal_date: formData.renewalDate,
           color: formData.color,
           icon: formData.icon,
         });
@@ -255,7 +251,7 @@ export default function App() {
             <ListHeading title="All Subscriptions" />
             
             {/* Search and Filters */}
-            <View className="mt-5 mb-4 space-y-3">
+            <View style={{ marginTop: 16, marginBottom: 16, gap: 12 }}>
               <View className="flex-row items-center bg-card rounded-full px-4 py-3 border border-border shadow-sm">
                 <Feather name="search" size={20} color="#081126" className="opacity-50" />
                 <TextInput 

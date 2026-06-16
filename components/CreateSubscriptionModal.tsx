@@ -12,6 +12,9 @@ import {
 import React, { useState } from "react";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 interface CreateSubscriptionFormData {
   name: string;
@@ -20,6 +23,8 @@ interface CreateSubscriptionFormData {
   category: string;
   color: string;
   icon: string;
+  startDate: string; // ISO string
+  renewalDate: string; // ISO string
 }
 
 interface CreateSubscriptionModalProps {
@@ -36,6 +41,7 @@ type Category =
   | "Design"
   | "Productivity"
   | "Other";
+
 const CATEGORIES: Category[] = [
   "Entertainment",
   "AI Tools",
@@ -44,6 +50,7 @@ const CATEGORIES: Category[] = [
   "Productivity",
   "Other",
 ];
+
 const CATEGORY_COLORS: Record<Category, string> = {
   Entertainment: "#ff6b6b",
   "AI Tools": "#b8d4e3",
@@ -53,61 +60,111 @@ const CATEGORY_COLORS: Record<Category, string> = {
   Other: "#d4d4d4",
 };
 
+const DATE_FORMAT = "DD/MM/YYYY";
+
+const toDisplayDate = (iso: string) => dayjs(iso).format(DATE_FORMAT);
+
+const parseDate = (input: string): dayjs.Dayjs | null => {
+  const parsed = dayjs(input, DATE_FORMAT, true);
+  return parsed.isValid() ? parsed : null;
+};
+
+const formatPlaceholder = () => dayjs().format(DATE_FORMAT);
+
 const CreateSubscriptionModal = ({
   visible,
   onClose,
   onSubmit,
 }: CreateSubscriptionModalProps) => {
+  const now = dayjs();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("Monthly");
   const [category, setCategory] = useState<Category>("Other");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [startDateInput, setStartDateInput] = useState(toDisplayDate(now.toISOString()));
+  const [renewalDateInput, setRenewalDateInput] = useState(toDisplayDate(now.add(1, "month").toISOString()));
 
-  // Improved price validation
-  const isValidPrice = () => {
-    const trimmedPrice = price.trim();
-    if (!trimmedPrice) return false;
-    // Strict numeric pattern check
-    if (!/^\s*[+-]?(\d+(\.\d+)?|\.\d+)\s*$/.test(trimmedPrice)) return false;
-    const numValue = Number(trimmedPrice);
-    return Number.isFinite(numValue) && numValue > 0;
+  // Auto-update renewal date when frequency or start date changes
+  const handleStartDateChange = (text: string) => {
+    setStartDateInput(text);
+    const parsed = parseDate(text);
+    if (parsed) {
+      const newRenewal = frequency === "Yearly"
+        ? parsed.add(1, "year")
+        : parsed.add(1, "month");
+      setRenewalDateInput(toDisplayDate(newRenewal.toISOString()));
+    }
   };
-  const isValidForm = name.trim() !== "" && isValidPrice() && !isSubmitting;
+
+  const handleFrequencyChange = (freq: Frequency) => {
+    setFrequency(freq);
+    const parsed = parseDate(startDateInput);
+    if (parsed) {
+      const newRenewal = freq === "Yearly"
+        ? parsed.add(1, "year")
+        : parsed.add(1, "month");
+      setRenewalDateInput(toDisplayDate(newRenewal.toISOString()));
+    }
+  };
+
+  const isValidPrice = () => {
+    const trimmed = price.trim();
+    if (!trimmed) return false;
+    if (!/^\s*[+-]?(\d+(\.\d+)?|\.\d+)\s*$/.test(trimmed)) return false;
+    const num = Number(trimmed);
+    return Number.isFinite(num) && num > 0;
+  };
+
+  const isValidStartDate = () => parseDate(startDateInput) !== null;
+  const isValidRenewalDate = () => parseDate(renewalDateInput) !== null;
+
+  const isValidForm =
+    name.trim() !== "" &&
+    isValidPrice() &&
+    isValidStartDate() &&
+    isValidRenewalDate() &&
+    !isSubmitting;
 
   const handleSubmit = async () => {
     if (!isValidForm) return;
-
     setIsSubmitting(true);
     try {
+      const startIso = parseDate(startDateInput)!.toISOString();
+      const renewalIso = parseDate(renewalDateInput)!.toISOString();
+
       await onSubmit({
         name: name.trim(),
         price: Number(price.trim()),
         billing: frequency,
         category,
         color: CATEGORY_COLORS[category],
-        icon: "plus", // Default icon key stored in DB
+        icon: "plus",
+        startDate: startIso,
+        renewalDate: renewalIso,
       });
 
       resetForm();
       onClose();
     } catch (err) {
       console.error("Subscription creation failed:", err);
-      // Keep the modal open so user can retry
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const resetForm = () => {
+    const n = dayjs();
     setName("");
     setPrice("");
     setFrequency("Monthly");
     setCategory("Other");
+    setStartDateInput(toDisplayDate(n.toISOString()));
+    setRenewalDateInput(toDisplayDate(n.add(1, "month").toISOString()));
   };
 
   const handleClose = () => {
-    if (isSubmitting) return; // Don't close while submitting
+    if (isSubmitting) return;
     resetForm();
     onClose();
   };
@@ -142,6 +199,7 @@ const CreateSubscriptionModal = ({
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
             >
+              {/* Name */}
               <View className="auth-field">
                 <Text className="auth-label">Name</Text>
                 <TextInput
@@ -154,6 +212,7 @@ const CreateSubscriptionModal = ({
                 />
               </View>
 
+              {/* Price */}
               <View className="auth-field">
                 <Text className="auth-label">Price</Text>
                 <TextInput
@@ -167,6 +226,7 @@ const CreateSubscriptionModal = ({
                 />
               </View>
 
+              {/* Frequency */}
               <View className="auth-field">
                 <Text className="auth-label">Frequency</Text>
                 <View className="picker-row">
@@ -175,7 +235,7 @@ const CreateSubscriptionModal = ({
                       "picker-option",
                       frequency === "Monthly" && "picker-option-active",
                     )}
-                    onPress={() => setFrequency("Monthly")}
+                    onPress={() => handleFrequencyChange("Monthly")}
                     disabled={isSubmitting}
                   >
                     <Text
@@ -192,7 +252,7 @@ const CreateSubscriptionModal = ({
                       "picker-option",
                       frequency === "Yearly" && "picker-option-active",
                     )}
-                    onPress={() => setFrequency("Yearly")}
+                    onPress={() => handleFrequencyChange("Yearly")}
                     disabled={isSubmitting}
                   >
                     <Text
@@ -207,6 +267,7 @@ const CreateSubscriptionModal = ({
                 </View>
               </View>
 
+              {/* Category */}
               <View className="auth-field">
                 <Text className="auth-label">Category</Text>
                 <View className="category-scroll">
@@ -233,6 +294,51 @@ const CreateSubscriptionModal = ({
                 </View>
               </View>
 
+              {/* Start Date */}
+              <View className="auth-field">
+                <Text className="auth-label">Start Date</Text>
+                <TextInput
+                  className={clsx(
+                    "auth-input",
+                    startDateInput && !isValidStartDate() && "border-red-400",
+                  )}
+                  placeholder={formatPlaceholder()}
+                  placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                  value={startDateInput}
+                  onChangeText={handleStartDateChange}
+                  keyboardType="numbers-and-punctuation"
+                  editable={!isSubmitting}
+                />
+                {startDateInput !== "" && !isValidStartDate() && (
+                  <Text style={{ color: "#ef4444", fontSize: 11, marginTop: 4 }}>
+                    Enter a valid date (DD/MM/YYYY)
+                  </Text>
+                )}
+              </View>
+
+              {/* Renewal Date */}
+              <View className="auth-field">
+                <Text className="auth-label">Renewal Date</Text>
+                <TextInput
+                  className={clsx(
+                    "auth-input",
+                    renewalDateInput && !isValidRenewalDate() && "border-red-400",
+                  )}
+                  placeholder={formatPlaceholder()}
+                  placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                  value={renewalDateInput}
+                  onChangeText={setRenewalDateInput}
+                  keyboardType="numbers-and-punctuation"
+                  editable={!isSubmitting}
+                />
+                {renewalDateInput !== "" && !isValidRenewalDate() && (
+                  <Text style={{ color: "#ef4444", fontSize: 11, marginTop: 4 }}>
+                    Enter a valid date (DD/MM/YYYY)
+                  </Text>
+                )}
+              </View>
+
+              {/* Submit */}
               <Pressable
                 className={clsx(
                   "auth-button",
