@@ -26,6 +26,7 @@ const SignIn = () => {
   const [newPassword, setNewPassword] = useState("");
   const [code, setCode] = useState("");
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetError, setResetError] = useState("");
 
   // Validation states
   const [emailTouched, setEmailTouched] = useState(false);
@@ -103,6 +104,7 @@ const SignIn = () => {
       setEmailTouched(true);
       return;
     }
+    setResetError("");
     try {
       await signIn.create({
         strategy: "reset_password_email_code",
@@ -111,6 +113,7 @@ const SignIn = () => {
       setIsResettingPassword(true);
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      setResetError(err.errors?.[0]?.longMessage || err.message || "Failed to send reset code.");
       posthog.capture("password_reset_request_failed", {
         error_message: err.message,
       });
@@ -119,6 +122,7 @@ const SignIn = () => {
 
   const handleResetPassword = async () => {
     if (!code || !newPassword) return;
+    setResetError("");
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: "reset_password_email_code",
@@ -146,6 +150,7 @@ const SignIn = () => {
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      setResetError(err.errors?.[0]?.longMessage || err.message || "Failed to reset password.");
     }
   };
 
@@ -239,6 +244,9 @@ const SignIn = () => {
 
               <View className="auth-card">
                 <View className="auth-form">
+                  {resetError ? (
+                    <Text className="auth-error text-center mb-2">{resetError}</Text>
+                  ) : null}
                   <View className="auth-field">
                     <Text className="auth-label">Verification Code</Text>
                     <TextInput
