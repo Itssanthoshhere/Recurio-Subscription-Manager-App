@@ -25,6 +25,7 @@ const SignUp = () => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [signUpError, setSignUpError] = useState("");
 
   // Validation states
   const [emailTouched, setEmailTouched] = useState(false);
@@ -40,6 +41,7 @@ const SignUp = () => {
 
   const handleSubmit = async () => {
     if (!formValid) return;
+    setSignUpError("");
 
     const { error } = await signUp.password({
       emailAddress,
@@ -47,29 +49,41 @@ const SignUp = () => {
     });
 
     if (error) {
-      console.error(JSON.stringify(error, null, 2));
+      console.warn("Clerk Sign Up Error:", error);
+      const msg = error.longMessage || error.message || "Failed to create account.";
+      setSignUpError(msg);
       posthog.capture("sign_up_failed", {
         step: "password",
         error_code: error.code,
+        error_message: msg,
       });
       return;
     }
 
     // Send verification email
     if (!error) {
-      await signUp.verifications.sendEmailCode();
+      try {
+        await signUp.verifications.sendEmailCode();
+      } catch (err: any) {
+        console.warn("Failed to send email verification:", err);
+        setSignUpError(err.message || "Failed to send verification code.");
+      }
     }
   };
 
   const handleVerify = async () => {
+    setSignUpError("");
     try {
       await signUp.verifications.verifyEmailCode({
         code,
       });
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
+    } catch (err: any) {
+      console.warn("Email Verification Error:", err);
+      const msg = err.longMessage || err.message || err.errors?.[0]?.longMessage || err.errors?.[0]?.message || "Invalid verification code.";
+      setSignUpError(msg);
       posthog.capture("sign_up_failed", {
         step: "email_verification",
+        error_message: msg,
       });
       return; // Return early on verification failure
     }
@@ -107,10 +121,12 @@ const SignUp = () => {
           },
         });
       } else {
-        console.error("Sign-up attempt not complete:", signUp);
+        console.warn("Sign-up attempt not complete:", signUp);
+        setSignUpError("Sign-up is not complete. Please check missing requirements.");
       }
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
+    } catch (err: any) {
+      console.warn("Verify completion error:", err);
+      setSignUpError(err.message || "Failed to complete sign up.");
     }
   };
 
@@ -157,6 +173,10 @@ const SignUp = () => {
               {/* Verification Form */}
               <View className="auth-card">
                 <View className="auth-form">
+                  {signUpError ? (
+                    <Text className="auth-error text-center mb-2">{signUpError}</Text>
+                  ) : null}
+
                   <View className="auth-field">
                     <Text className="auth-label">Verification Code</Text>
                     <TextInput
@@ -239,6 +259,10 @@ const SignUp = () => {
             {/* Sign-Up Form */}
             <View className="auth-card">
               <View className="auth-form">
+                {signUpError ? (
+                  <Text className="auth-error text-center mb-2">{signUpError}</Text>
+                ) : null}
+
                 <View className="auth-field">
                   <Text className="auth-label">Email Address</Text>
                   <TextInput
