@@ -7,15 +7,12 @@ import { ClerkProvider, useAuth, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { PostHogProvider } from "posthog-react-native";
 
+import { View, Text } from "react-native";
 import { posthog } from "@/src/config/posthog";
 
 SplashScreen.preventAutoHideAsync();
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-
-if (!publishableKey) {
-  throw new Error("Add your Clerk Publishable Key to the .env file");
-}
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
 
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
@@ -75,6 +72,19 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
+  if (!publishableKey) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff", padding: 20 }}>
+        <Text style={{ fontSize: 20, fontWeight: "bold", color: "#ef4444", marginBottom: 12 }}>
+          Configuration Error
+        </Text>
+        <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 20 }}>
+          Clerk Publishable Key is missing. Please make sure EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is configured in your build environment/secrets.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <PostHogProvider
