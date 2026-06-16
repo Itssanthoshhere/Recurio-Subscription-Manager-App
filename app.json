@@ -55,7 +55,15 @@
         }
       ],
       "@clerk/expo",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/logo.png",
+          "color": "#6C63FF",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
