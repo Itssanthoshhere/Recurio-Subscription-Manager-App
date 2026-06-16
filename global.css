@@ -355,7 +355,7 @@
   }
 
   .modal-container {
-    @apply mt-auto max-h-[85%] rounded-t-3xl bg-background;
+    @apply mt-auto h-[80%] rounded-t-3xl bg-background flex-col;
   }
 
   .modal-header {
