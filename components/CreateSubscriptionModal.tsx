@@ -9,7 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -98,7 +98,7 @@ const CreateSubscriptionModal = ({
   const [renewalDateInput, setRenewalDateInput] = useState(toDisplayDate(now.add(1, "month").toISOString()));
   const [paymentMethod, setPaymentMethod] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
       if (subscriptionToEdit) {
         setName(subscriptionToEdit.name);
