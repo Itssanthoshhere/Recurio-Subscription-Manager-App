@@ -105,52 +105,67 @@ const SignIn = () => {
       return;
     }
     setResetError("");
-    try {
-      await signIn.create({
-        strategy: "reset_password_email_code",
-        identifier: emailAddress,
-      });
-      setIsResettingPassword(true);
-    } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2));
-      setResetError(err.errors?.[0]?.longMessage || err.message || "Failed to send reset code.");
-      posthog.capture("password_reset_request_failed", {
-        error_message: err.message,
-      });
+    
+    const { error: createError } = await signIn.create({
+      identifier: emailAddress,
+    });
+    
+    if (createError) {
+      console.error(JSON.stringify(createError, null, 2));
+      setResetError(createError.longMessage || createError.message || "Failed to start reset flow.");
+      return;
     }
+
+    const { error: sendError } = await signIn.resetPasswordEmailCode.sendCode();
+    
+    if (sendError) {
+      console.error(JSON.stringify(sendError, null, 2));
+      setResetError(sendError.longMessage || sendError.message || "Failed to send reset code.");
+      return;
+    }
+
+    setIsResettingPassword(true);
   };
 
   const handleResetPassword = async () => {
     if (!code || !newPassword) return;
     setResetError("");
-    try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "reset_password_email_code",
-        code,
-        password: newPassword,
-      });
+    
+    const { error: verifyError } = await signIn.resetPasswordEmailCode.verifyCode({
+      code,
+    });
+    
+    if (verifyError) {
+      console.error(JSON.stringify(verifyError, null, 2));
+      setResetError(verifyError.longMessage || verifyError.message || "Invalid verification code.");
+      return;
+    }
 
-      if (result.status === "complete") {
-        await signIn.finalize({
-          navigate: ({ decorateUrl }) => {
-            const url = decorateUrl("/(tabs)");
-            if (url.startsWith("http")) {
-              if (typeof window !== "undefined" && window.location) {
-                window.location.href = url;
-              } else {
-                router.replace("/(tabs)" as Href);
-              }
+    const { error: submitError } = await signIn.resetPasswordEmailCode.submitPassword({
+      password: newPassword,
+    });
+    
+    if (submitError) {
+      console.error(JSON.stringify(submitError, null, 2));
+      setResetError(submitError.longMessage || submitError.message || "Failed to reset password.");
+      return;
+    }
+
+    if (signIn.status === "complete") {
+      await signIn.finalize({
+        navigate: ({ decorateUrl }) => {
+          const url = decorateUrl("/(tabs)");
+          if (url.startsWith("http")) {
+            if (typeof window !== "undefined" && window.location) {
+              window.location.href = url;
             } else {
-              router.replace(url as Href);
+              router.replace("/(tabs)" as Href);
             }
-          },
-        });
-      } else {
-        console.log(result);
-      }
-    } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2));
-      setResetError(err.errors?.[0]?.longMessage || err.message || "Failed to reset password.");
+          } else {
+            router.replace(url as Href);
+          }
+        },
+      });
     }
   };
 
