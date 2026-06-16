@@ -1,5 +1,6 @@
 import { View, Text, Image, Pressable, ImageSourcePropType } from "react-native";
 import React, { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   formatCurrency,
   formatStatusLabel,
@@ -8,6 +9,7 @@ import {
 import clsx from "clsx";
 
 const SubscriptionCard = ({
+  id,
   name,
   price,
   currency,
@@ -23,6 +25,7 @@ const SubscriptionCard = ({
   startDate,
   status,
 }: SubscriptionCardProps) => {
+  const router = useRouter();
   const [iconError, setIconError] = useState(false);
 
   // Check if icon is a remote URI
@@ -137,6 +140,13 @@ const SubscriptionCard = ({
                 </Text>
               </View>
             </View>
+
+            <Pressable
+              onPress={() => router.push(`/subscriptions/${id}`)}
+              className="mt-4 py-2.5 bg-accent rounded-xl items-center justify-center shadow-sm opacity-90 active:opacity-100"
+            >
+              <Text className="text-white font-sans-bold text-sm">View Details & Edit</Text>
+            </Pressable>
           </View>
         </View>
       )}
