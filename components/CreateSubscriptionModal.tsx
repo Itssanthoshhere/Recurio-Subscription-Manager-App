@@ -267,10 +267,10 @@ const CreateSubscriptionModal = ({
             </View>
 
             <ScrollView
-              className="p-5"
+              className="flex-1 p-5"
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
+              contentContainerStyle={{ gap: 20, paddingBottom: 60 }}
             >
               {/* Name */}
               <View className="auth-field">
