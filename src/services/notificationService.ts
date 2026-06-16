@@ -3,6 +3,8 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 
+import * as SecureStore from 'expo-secure-store';
+
 // ─── Notification Behaviour ───────────────────────────────────────────────────
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -56,7 +58,7 @@ export interface SubscriptionRenewal {
 }
 
 /**
- * Schedules a local notification 1 day before each subscription's renewal date.
+ * Schedules a local notification before each subscription's renewal date based on settings stored in SecureStore.
  * Cancels any existing scheduled notifications for the same subscription first.
  */
 export async function scheduleRenewalReminders(
@@ -67,6 +69,21 @@ export async function scheduleRenewalReminders(
 
   // Cancel all existing scheduled reminders first
   await Notifications.cancelAllScheduledNotificationsAsync();
+  console.log('[Notifications] Cancelled all existing scheduled notifications.');
+
+  // Load preferences from SecureStore
+  const storedEnabled = await SecureStore.getItemAsync('recurio_notif_enabled');
+  if (storedEnabled === 'false') {
+    console.log('[Notifications] Renewal reminders are disabled in settings.');
+    return;
+  }
+
+  const storedDaysOffset = await SecureStore.getItemAsync('recurio_notif_days_before');
+  const storedTime = await SecureStore.getItemAsync('recurio_notif_time');
+
+  const daysOffset = storedDaysOffset ? parseInt(storedDaysOffset, 10) : 1;
+  const timeStr = storedTime || '09:00';
+  const [hours, minutes] = timeStr.split(':').map(Number);
 
   const now = dayjs();
 
@@ -78,16 +95,28 @@ export async function scheduleRenewalReminders(
     }
     if (!renewal.isValid()) continue;
 
-    // Schedule notification for 9 AM, 1 day before renewal
-    const reminderDate = renewal.subtract(1, 'day').hour(9).minute(0).second(0).millisecond(0);
+    // Calculate dynamic reminder date/time
+    const reminderDate = renewal.subtract(daysOffset, 'day').hour(hours).minute(minutes).second(0).millisecond(0);
 
     if (reminderDate.isBefore(now)) continue; // Already passed
+
+    // Adjust title/body based on days offset
+    let title = '🔔 Subscription Renewing Tomorrow!';
+    let body = `${sub.name} renews tomorrow for ${sub.currency}${sub.price}. Tap to review.`;
+
+    if (daysOffset === 0) {
+      title = '🔔 Subscription Renewing Today!';
+      body = `${sub.name} renews today for ${sub.currency}${sub.price}. Tap to review.`;
+    } else if (daysOffset > 1) {
+      title = `🔔 Subscription Renewing in ${daysOffset} Days!`;
+      body = `${sub.name} renews in ${daysOffset} days for ${sub.currency}${sub.price}. Tap to review.`;
+    }
 
     await Notifications.scheduleNotificationAsync({
       identifier: `renewal-${sub.id}`,
       content: {
-        title: '🔔 Subscription Renewing Tomorrow!',
-        body: `${sub.name} renews tomorrow for ${sub.currency}${sub.price}. Tap to review.`,
+        title,
+        body,
         data: { subscriptionId: sub.id },
         sound: true,
       },
@@ -98,7 +127,7 @@ export async function scheduleRenewalReminders(
     });
 
     console.log(
-      `[Notifications] Scheduled reminder for "${sub.name}" on ${reminderDate.format('DD/MM/YYYY HH:mm')}`
+      `[Notifications] Scheduled reminder for "${sub.name}" on ${reminderDate.format('DD/MM/YYYY HH:mm')} (${daysOffset} day(s) offset)`
     );
   }
 }
