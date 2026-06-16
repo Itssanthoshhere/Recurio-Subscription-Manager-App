@@ -96,6 +96,25 @@ const parseDate = (input: string): dayjs.Dayjs | null => {
 
 const formatPlaceholder = () => dayjs().format(DATE_FORMAT);
 
+const formatAsDateInput = (text: string, prevText: string): string => {
+  const digits = text.replace(/\D/g, "");
+  if (text.length < prevText.length) {
+    if (prevText.endsWith("/") && !text.endsWith("/")) {
+      return text.substring(0, text.length - 1);
+    }
+    return text;
+  }
+  let formatted = "";
+  if (digits.length <= 2) {
+    formatted = digits;
+  } else if (digits.length <= 4) {
+    formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  } else {
+    formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+  }
+  return formatted;
+};
+
 const CreateSubscriptionModal = ({
   visible,
   onClose,
@@ -136,14 +155,20 @@ const CreateSubscriptionModal = ({
 
   // Auto-update renewal date when frequency or start date changes
   const handleStartDateChange = (text: string) => {
-    setStartDateInput(text);
-    const parsed = parseDate(text);
+    const formatted = formatAsDateInput(text, startDateInput);
+    setStartDateInput(formatted);
+    const parsed = parseDate(formatted);
     if (parsed) {
       const newRenewal = frequency === "Yearly"
         ? parsed.add(1, "year")
         : parsed.add(1, "month");
       setRenewalDateInput(toDisplayDate(newRenewal.toISOString()));
     }
+  };
+
+  const handleRenewalDateChange = (text: string) => {
+    const formatted = formatAsDateInput(text, renewalDateInput);
+    setRenewalDateInput(formatted);
   };
 
   const handleFrequencyChange = (freq: Frequency) => {
@@ -438,7 +463,7 @@ const CreateSubscriptionModal = ({
                   placeholder={formatPlaceholder()}
                   placeholderTextColor="rgba(0, 0, 0, 0.4)"
                   value={renewalDateInput}
-                  onChangeText={setRenewalDateInput}
+                  onChangeText={handleRenewalDateChange}
                   keyboardType="numbers-and-punctuation"
                   editable={!isSubmitting}
                 />
