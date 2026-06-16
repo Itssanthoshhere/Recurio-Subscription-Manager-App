@@ -277,11 +277,14 @@ const CreateSubscriptionModal = ({
         className="flex-1"
         keyboardVerticalOffset={0}
       >
-        <Pressable className="modal-overlay" onPress={handleClose}>
+        <View className="flex-1 justify-end">
+          {/* Backdrop overlay */}
           <Pressable
-            className="modal-container"
-            onPress={(e) => e.stopPropagation()}
-          >
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            onPress={handleClose}
+          />
+          {/* Modal Container */}
+          <View className="modal-container">
             <View className="modal-header">
               <Text className="modal-title">
                 {subscriptionToEdit ? "Edit Subscription" : "New Subscription"}
@@ -492,8 +495,8 @@ const CreateSubscriptionModal = ({
                 )}
               </Pressable>
             </ScrollView>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </Modal>
   );
