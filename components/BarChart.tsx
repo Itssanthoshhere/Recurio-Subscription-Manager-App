@@ -41,7 +41,7 @@ const BarChart = ({ data }: BarChartProps) => {
           {data.map((item, index) => {
             // Calculate height percentage relative to max value
             // The grid covers from 0 to 45
-            const heightPercent = `${(item.value / maxValue) * 100}%`;
+            const heightPercent = `${(item.value / maxValue) * 100}%` as any;
 
             return (
               <View key={index} className="items-center relative">

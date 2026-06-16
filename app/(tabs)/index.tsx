@@ -279,7 +279,7 @@ export default function App() {
                     key={cat}
                     onPress={() => {
                       setSelectedCategory(cat as string);
-                      posthog.capture('filter_applied', { category: cat });
+                      posthog.capture('filter_applied', { category: cat ?? null });
                     }}
                     className={`px-4 py-2 rounded-full border ${selectedCategory === cat ? 'bg-accent border-accent' : 'bg-card border-border'}`}
                   >
