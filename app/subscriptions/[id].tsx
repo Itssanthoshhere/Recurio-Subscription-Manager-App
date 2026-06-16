@@ -7,6 +7,7 @@ import { formatCurrency, formatSubscriptionDateTime, formatStatusLabel } from "@
 import Feather from "@expo/vector-icons/Feather";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -16,6 +17,7 @@ const SubscriptionDetails = () => {
   const posthog = usePostHog();
   const { subscriptions, updateSubscription, deleteSubscription, isLoading } = useSubscriptions();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   useEffect(() => {
     if (id && typeof id === 'string' && id.trim()) {
@@ -91,6 +93,28 @@ const SubscriptionDetails = () => {
     );
   };
 
+  const handleEditSubmit = async (formData: any) => {
+    try {
+      await updateSubscription(subscription.id, {
+        name: formData.name,
+        price: formData.price,
+        billing: formData.billing,
+        category: formData.category,
+        color: formData.color,
+        icon: formData.icon,
+        start_date: formData.startDate,
+        renewal_date: formData.renewalDate,
+        payment_method: formData.paymentMethod,
+      });
+      posthog.capture("subscription_updated", {
+        subscription_id: subscription.id,
+      });
+    } catch (err) {
+      Alert.alert("Error", "Failed to update subscription");
+      throw err;
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Header */}
@@ -99,7 +123,9 @@ const SubscriptionDetails = () => {
           <Feather name="chevron-left" className="text-primary" size={24} />
         </Pressable>
         <Text className="text-xl font-sans-bold text-primary">Details</Text>
-        <View className="size-10" /> {/* Spacer */}
+        <Pressable onPress={() => setIsEditModalVisible(true)} className="size-10 items-center justify-center rounded-full border border-border bg-background">
+          <Feather name="edit-2" className="text-primary" size={18} />
+        </Pressable>
       </View>
 
       <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -169,6 +195,22 @@ const SubscriptionDetails = () => {
         </View>
 
       </ScrollView>
+
+      <CreateSubscriptionModal
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        onSubmit={handleEditSubmit}
+        subscriptionToEdit={subscription ? {
+          id: subscription.id,
+          name: subscription.name,
+          price: subscription.price,
+          billing: subscription.billing,
+          category: subscription.category ?? undefined,
+          startDate: subscription.start_date ?? undefined,
+          renewalDate: subscription.renewal_date ?? undefined,
+          paymentMethod: subscription.payment_method ?? undefined,
+        } : null}
+      />
     </SafeAreaView>
   );
 };

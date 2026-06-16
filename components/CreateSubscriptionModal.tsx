@@ -32,6 +32,16 @@ interface CreateSubscriptionModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (formData: CreateSubscriptionFormData) => Promise<void>;
+  subscriptionToEdit?: {
+    id: string;
+    name: string;
+    price: number;
+    billing: string;
+    category?: string;
+    startDate?: string;
+    renewalDate?: string;
+    paymentMethod?: string;
+  } | null;
 }
 
 type Frequency = "Monthly" | "Yearly";
@@ -76,6 +86,7 @@ const CreateSubscriptionModal = ({
   visible,
   onClose,
   onSubmit,
+  subscriptionToEdit,
 }: CreateSubscriptionModalProps) => {
   const now = dayjs();
   const [name, setName] = useState("");
@@ -86,6 +97,26 @@ const CreateSubscriptionModal = ({
   const [startDateInput, setStartDateInput] = useState(toDisplayDate(now.toISOString()));
   const [renewalDateInput, setRenewalDateInput] = useState(toDisplayDate(now.add(1, "month").toISOString()));
   const [paymentMethod, setPaymentMethod] = useState("");
+
+  React.useEffect(() => {
+    if (visible) {
+      if (subscriptionToEdit) {
+        setName(subscriptionToEdit.name);
+        setPrice(String(subscriptionToEdit.price));
+        setFrequency((subscriptionToEdit.billing === "Yearly" ? "Yearly" : "Monthly") as Frequency);
+        setCategory((subscriptionToEdit.category || "Other") as Category);
+        setPaymentMethod(subscriptionToEdit.paymentMethod || "");
+        if (subscriptionToEdit.startDate) {
+          setStartDateInput(toDisplayDate(subscriptionToEdit.startDate));
+        }
+        if (subscriptionToEdit.renewalDate) {
+          setRenewalDateInput(toDisplayDate(subscriptionToEdit.renewalDate));
+        }
+      } else {
+        resetForm();
+      }
+    }
+  }, [visible, subscriptionToEdit]);
 
   // Auto-update renewal date when frequency or start date changes
   const handleStartDateChange = (text: string) => {
@@ -210,7 +241,9 @@ const CreateSubscriptionModal = ({
             onPress={(e) => e.stopPropagation()}
           >
             <View className="modal-header">
-              <Text className="modal-title">New Subscription</Text>
+              <Text className="modal-title">
+                {subscriptionToEdit ? "Edit Subscription" : "New Subscription"}
+              </Text>
               <Pressable className="modal-close" onPress={handleClose}>
                 <Text className="modal-close-text">✕</Text>
               </Pressable>
@@ -386,7 +419,9 @@ const CreateSubscriptionModal = ({
                 {isSubmitting ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text className="auth-button-text">Create Subscription</Text>
+                  <Text className="auth-button-text">
+                    {subscriptionToEdit ? "Save Changes" : "Create Subscription"}
+                  </Text>
                 )}
               </Pressable>
             </ScrollView>
