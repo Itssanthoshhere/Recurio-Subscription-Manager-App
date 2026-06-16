@@ -127,7 +127,7 @@ const CreateSubscriptionModal = ({
     !isSubmitting;
 
   const determineIcon = (subName: string, cat: string): string => {
-    const n = subName.toLowerCase();
+    const n = subName.toLowerCase().trim();
     if (n.includes("notion")) return "notion";
     if (n.includes("dropbox")) return "dropbox";
     if (n.includes("chatgpt") || n.includes("openai")) return "openai";
@@ -138,11 +138,9 @@ const CreateSubscriptionModal = ({
     if (n.includes("claude") || n.includes("anthropic")) return "claude";
     if (n.includes("canva")) return "canva";
     
-    if (n.includes("music") || n.includes("spotify") || n.includes("apple") || cat === "Entertainment") {
-      return "music";
-    }
-    
-    return "plus";
+    // Auto-fetch logo for any other brand using Clearbit API
+    const domain = n.replace(/\s+/g, '') + ".com";
+    return `https://logo.clearbit.com/${domain}`;
   };
 
   const handleSubmit = async () => {

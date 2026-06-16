@@ -7,8 +7,13 @@ import { icons, IconKey } from '@/constants/icons';
  * Falls back to `icons.plus` if the key is not found.
  */
 const resolveIcon = (iconKey: string | null): ImageSourcePropType => {
-  if (iconKey && iconKey in icons) {
-    return icons[iconKey as IconKey];
+  if (iconKey) {
+    if (iconKey.startsWith('http')) {
+      return { uri: iconKey };
+    }
+    if (iconKey in icons) {
+      return icons[iconKey as IconKey];
+    }
   }
   return icons.plus;
 };
