@@ -23,7 +23,9 @@ const SignIn = () => {
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [code, setCode] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // Validation states
   const [emailTouched, setEmailTouched] = useState(false);
@@ -96,6 +98,57 @@ const SignIn = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!emailValid || emailAddress.length === 0) {
+      setEmailTouched(true);
+      return;
+    }
+    try {
+      await signIn.create({
+        strategy: "reset_password_email_code",
+        identifier: emailAddress,
+      });
+      setIsResettingPassword(true);
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+      posthog.capture("password_reset_request_failed", {
+        error_message: err.message,
+      });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!code || !newPassword) return;
+    try {
+      const result = await signIn.attemptFirstFactor({
+        strategy: "reset_password_email_code",
+        code,
+        password: newPassword,
+      });
+
+      if (result.status === "complete") {
+        await signIn.finalize({
+          navigate: ({ decorateUrl }) => {
+            const url = decorateUrl("/(tabs)");
+            if (url.startsWith("http")) {
+              if (typeof window !== "undefined" && window.location) {
+                window.location.href = url;
+              } else {
+                router.replace("/(tabs)" as Href);
+              }
+            } else {
+              router.replace(url as Href);
+            }
+          },
+        });
+      } else {
+        console.log(result);
+      }
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+    }
+  };
+
   const handleVerify = async () => {
     try {
       if (signIn.status === "needs_client_trust") {
@@ -162,6 +215,75 @@ const SignIn = () => {
       console.error(JSON.stringify(err, null, 2));
     }
   };
+
+  // Show reset password screen
+  if (isResettingPassword) {
+    return (
+      <SafeAreaView className="auth-safe-area">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="auth-screen"
+        >
+          <ScrollView
+            className="auth-scroll"
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="auth-content">
+              <View className="auth-brand-block">
+                <Text className="auth-title">Reset Password</Text>
+                <Text className="auth-subtitle">
+                  We sent a code to {emailAddress}
+                </Text>
+              </View>
+
+              <View className="auth-card">
+                <View className="auth-form">
+                  <View className="auth-field">
+                    <Text className="auth-label">Verification Code</Text>
+                    <TextInput
+                      className="auth-input"
+                      value={code}
+                      placeholder="Enter the code"
+                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      onChangeText={setCode}
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                  <View className="auth-field">
+                    <Text className="auth-label">New Password</Text>
+                    <TextInput
+                      className="auth-input"
+                      value={newPassword}
+                      placeholder="Enter new password"
+                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      secureTextEntry
+                      onChangeText={setNewPassword}
+                    />
+                  </View>
+
+                  <Pressable
+                    className={`auth-button ${(!code || !newPassword) && "auth-button-disabled"}`}
+                    onPress={handleResetPassword}
+                    disabled={!code || !newPassword}
+                  >
+                    <Text className="auth-button-text">Reset Password</Text>
+                  </Pressable>
+
+                  <Pressable
+                    className="auth-secondary-button"
+                    onPress={() => setIsResettingPassword(false)}
+                  >
+                    <Text className="auth-secondary-button-text">Cancel</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
 
   // Show verification screen if client trust or second factor is needed
   if (signIn.status === "needs_client_trust" || signIn.status === "needs_second_factor") {
@@ -336,6 +458,10 @@ const SignIn = () => {
                       {errors.fields.password.message}
                     </Text>
                   )}
+                  
+                  <Pressable onPress={handleForgotPassword} className="mt-1 self-end">
+                    <Text className="text-sm font-sans-medium text-accent">Forgot Password?</Text>
+                  </Pressable>
                 </View>
 
                 <Pressable
