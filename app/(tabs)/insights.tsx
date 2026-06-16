@@ -110,7 +110,7 @@ const Insights = () => {
             </View>
             <View>
               <Text className="expenses-amount">
-                -{formatCurrency(totalExpenses, "INR")}
+                {formatCurrency(totalExpenses, "INR")}
               </Text>
               <Text className="expenses-growth">Current Rate</Text>
             </View>
