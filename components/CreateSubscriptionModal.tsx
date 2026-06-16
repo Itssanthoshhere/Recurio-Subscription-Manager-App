@@ -380,7 +380,7 @@ const CreateSubscriptionModal = ({
                       onPress={() => setColor(c)}
                       className={clsx(
                         "size-8 rounded-full border border-black/10 items-center justify-center",
-                        color === c && "border-2 border-[#081126] scale-110"
+                        color === c && "border-2 border-[#081126]"
                       )}
                       style={{ backgroundColor: c }}
                     >
