@@ -18,10 +18,12 @@ import { mapRowToSubscription, mapRowToUpcoming } from "@/src/utils/mappers";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
 import Feather from "@expo/vector-icons/Feather";
+import { useRouter } from "expo-router";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
+  const router = useRouter();
   const { user } = useUser();
   const posthog = usePostHog();
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
@@ -230,7 +232,7 @@ export default function App() {
               </View>
             </View>
             <View className="mb-5">
-              <ListHeading title="Upcoming" />
+              <ListHeading title="Upcoming" hideViewAll />
 
               <FlatList
                 data={upcomingSubscriptions}
@@ -248,7 +250,7 @@ export default function App() {
               />
             </View>
 
-            <ListHeading title="All Subscriptions" />
+            <ListHeading title="All Subscriptions" onPress={() => router.push('/(tabs)/subscriptions')} />
             
             {/* Search and Filters */}
             <View style={{ marginTop: 16, marginBottom: 16, gap: 12 }}>

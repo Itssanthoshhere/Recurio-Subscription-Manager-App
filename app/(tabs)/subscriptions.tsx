@@ -1,25 +1,40 @@
-import { Text, View, TextInput, FlatList } from "react-native";
+import { Text, View, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import SubscriptionCard from "@/components/SubscriptionCard";
-import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useSubscriptions } from "@/src/hooks/useSubscriptions";
+import { mapRowToSubscription } from "@/src/utils/mappers";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const Subscriptions = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { subscriptions } = useSubscriptionStore();
+  const { subscriptions, isLoading } = useSubscriptions();
 
-  const filteredSubscriptions = subscriptions.filter(
-    (subscription) =>
-      subscription.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      subscription.category
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      subscription.plan?.toLowerCase().includes(searchQuery.toLowerCase()),
+  const allUiSubscriptions = useMemo(
+    () => subscriptions.map(mapRowToSubscription),
+    [subscriptions],
   );
+
+  const filteredSubscriptions = useMemo(() => {
+    if (!searchQuery.trim()) return allUiSubscriptions;
+    const lower = searchQuery.toLowerCase();
+    return allUiSubscriptions.filter(
+      (sub) =>
+        sub.name.toLowerCase().includes(lower) ||
+        (sub.category && sub.category.toLowerCase().includes(lower))
+    );
+  }, [allUiSubscriptions, searchQuery]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-background items-center justify-center">
+        <ActivityIndicator size="large" color="#ea7a53" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background">
