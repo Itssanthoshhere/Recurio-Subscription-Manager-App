@@ -20,6 +20,7 @@ A Premium, High-Fidelity Expo & React Native Application to Track, Manage, and O
   - [🚀 Getting Started](#-getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+  - [📦 Latest Build](#-latest-build)
   - [🎯 Key Components](#-key-components)
     - [1. `<CreateSubscriptionModal />`](#1-createsubscriptionmodal-)
     - [2. `<SubscriptionCard />`](#2-subscriptioncard-)
@@ -33,36 +34,42 @@ A Premium, High-Fidelity Expo & React Native Application to Track, Manage, and O
 **Recurio** is a pixel-perfect, feature-rich subscription tracking mobile app. Built on the modern Expo SDK 54, it addresses the real-world challenge of "subscription fatigue" by giving users an elegant control center to monitor payments, analyze costs, customize designs, and receive timely alerts before renewals hit.
 
 This project serves as a comprehensive study of:
-* 🔑 Secure, identity-first auth integration with **Clerk**
-* ⚡ Optimistic UI updates with **Zustand** client state caching
-* 🗄️ Real-time backend queries and mutations via **Supabase**
-* 🔔 Local push notifications configured dynamically with user settings
-* 🎨 Responsive hybrid layouts powered by **NativeWind v5**
+
+- 🔑 Secure, identity-first auth integration with **Clerk**
+- ⚡ Optimistic UI updates with **Zustand** client state caching
+- 🗄️ Real-time backend queries and mutations via **Supabase**
+- 🔔 Local push notifications configured dynamically with user settings
+- 🎨 Responsive hybrid layouts powered by **NativeWind v5**
 
 ---
 
 ## ✨ Features
 
 ### 🔐 Authentication Gate
+
 - Managed secure onboarding flows using **Clerk**.
 - Supports standard signup verification pins, MFA, and JWT session handling.
 
 ### 📊 Dashboard & Tracking
+
 - Dynamic list displaying active subscriptions sorted by Newest, Cost, or Renewal Date.
 - Search filter to query items instantly.
 - Collapsible cards displaying subscription metadata (Payment method, start date, renewal, and status).
 - Direct route navigation from cards to detailed views.
 
 ### ✏️ Edit Subscription modal
+
 - Reusable slide-up bottom sheet modal that adapts seamlessly between Creation and Edit modes.
 - Pre-populated form fields on edit mode with automatic date-separator `/` formatting as you type.
 - **Custom Card Color Selection**: A curated palette of 10 modern colors allows styling cards individually to prevent duplicate themes.
 
 ### 📈 Expense Insights
+
 - Interactive **Bar Chart** detailing expenses across categories (Entertainment, AI Tools, Dev Tools, Design, Productivity, etc.).
 - Active monthly expenditure aggregates formatted in local currency.
 
 ### ⚙️ Secure Settings
+
 - **Notification Controls**: Toggle reminders, customize alert intervals (days before renewal), and set target times.
 - State-preserving credentials update inputs.
 
@@ -70,16 +77,16 @@ This project serves as a comprehensive study of:
 
 ## 🛠️ Tech Stack
 
-| Category | Technology | Version | Purpose |
-| :--- | :--- | :--- | :--- |
-| **Framework** | Expo SDK | 54.0.34 | Cross-platform build & deploy system |
-| **Runtime** | React Native | 0.81.5 | Native mobile performance and widgets |
-| **Backend** | Supabase | 2.108.1 | PostgreSQL backend database client |
-| **Auth** | Clerk | 3.4.2 | High-fidelity user accounts & identity provider |
-| **State** | Zustand | 1.0.0 | Lightweight global client state caching |
-| **Styling** | NativeWind | 5.0.0 | Tailwind v4 utility class compilation for React Native |
-| **Alerts** | Expo Notifications | 0.32.17 | Scheduling background renewal reminders |
-| **Storage** | Expo Secure Store | 15.0.8 | Encrypting configurations at rest |
+| Category      | Technology         | Version | Purpose                                                |
+| :------------ | :----------------- | :------ | :----------------------------------------------------- |
+| **Framework** | Expo SDK           | 54.0.34 | Cross-platform build & deploy system                   |
+| **Runtime**   | React Native       | 0.81.5  | Native mobile performance and widgets                  |
+| **Backend**   | Supabase           | 2.108.1 | PostgreSQL backend database client                     |
+| **Auth**      | Clerk              | 3.4.2   | High-fidelity user accounts & identity provider        |
+| **State**     | Zustand            | 1.0.0   | Lightweight global client state caching                |
+| **Styling**   | NativeWind         | 5.0.0   | Tailwind v4 utility class compilation for React Native |
+| **Alerts**    | Expo Notifications | 0.32.17 | Scheduling background renewal reminders                |
+| **Storage**   | Expo Secure Store  | 15.0.8  | Encrypting configurations at rest                      |
 
 ---
 
@@ -126,28 +133,33 @@ recurio-subscription-manager-app/
 ### Prerequisites
 
 Ensure you have the following installed:
-* Node.js >= 18.0.0
-* npm >= 9.0.0
-* iOS Simulator or Android Emulator
+
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+- iOS Simulator or Android Emulator
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Itssanthoshhere/Recurio-Subscription-Manager-App.git
    cd Recurio-Subscription-Manager-App
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment variables**
    Copy `.env.example` to `.env` and supply your secrets:
+
    ```bash
    cp .env.example .env
    ```
+
    Add your Clerk publishable key and Supabase credentials.
 
 4. **Start the Expo server**
@@ -159,15 +171,26 @@ Press `i` to launch the iOS simulator or `a` to launch the Android emulator.
 
 ---
 
+## 📦 Latest Build
+
+- **Android Preview Build**: [View on EAS](https://expo.dev/accounts/itssanthoshhere/projects/recurio-subscription-manager-app/builds/12b87966-fe02-4b6d-b65f-3c3947cc7795)
+- **APK Download**: `Recurio-v1.0.0.apk`
+
+---
+
 ## 🎯 Key Components
 
 ### 1. `<CreateSubscriptionModal />`
+
 A versatile slide-up bottom sheet modal that dynamically handles creation and editing.
+
 - Intercepts layout sizes with sibling absolute backdrops to prevent React Native gesture conflicts with `<ScrollView>`.
 - Pre-populates fields on load and uses an auto-slash input formatter for dates.
 
 ### 2. `<SubscriptionCard />`
+
 An expandable list card featuring color overrides.
+
 - Integrates a **"View Details & Edit"** action button that pushes the item's router path to the subscription page.
 
 ---
