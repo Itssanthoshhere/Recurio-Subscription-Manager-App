@@ -2,8 +2,8 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # Run at 00:00 every 3 days to prevent the 7-day inactivity pause
-    - cron: '0 0 */3 * *'
+    # Run at 00:00 every day to prevent the 7-day inactivity pause
+    - cron: '0 0 * * *'
   # Allow manual triggering from the GitHub Actions tab
   workflow_dispatch: 
 
@@ -24,12 +24,12 @@ jobs:
 
           echo "Pinging Supabase to keep it active..."
           
-          # We make a simple HTTP GET request to the REST API root
-          # This is enough to register as "activity" for the project
+          # We query a specific table with a limit of 1 to ensure the Postgres database 
+          # is actually hit, which guarantees it counts as "activity".
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "$SUPABASE_URL/rest/v1/")
+            "$SUPABASE_URL/rest/v1/subscriptions?select=id&limit=1")
 
           echo "Supabase responded with HTTP Status: $HTTP_STATUS"
           echo "Ping successful!"
