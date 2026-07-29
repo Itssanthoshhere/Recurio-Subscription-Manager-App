@@ -25,11 +25,15 @@ jobs:
           echo "Pinging Supabase to keep it active..."
           
           # We query a specific table with a limit of 1 to ensure the Postgres database 
-          # is actually hit, which guarantees it counts as "activity".
+          # is actually hit. We also add a cache buster and a real User-Agent so 
+          # Supabase doesn't filter this out as bot traffic.
+          CACHE_BUSTER=$(date +%s)
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "$SUPABASE_URL/rest/v1/subscriptions?select=id&limit=1")
+            -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36" \
+            -H "Accept: application/json" \
+            "$SUPABASE_URL/rest/v1/subscriptions?select=id&limit=1&_cb=$CACHE_BUSTER")
 
           echo "Supabase responded with HTTP Status: $HTTP_STATUS"
           echo "Ping successful!"
